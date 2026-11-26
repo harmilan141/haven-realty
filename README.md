@@ -23,7 +23,7 @@ Bugs from the desktop code (8-values-into-9-columns insert, photos wiped on upda
 Requirements: JDK 17+, Maven 3.9+, Node 20+.
 
 ```powershell
-# 1) backend  (http://localhost:8080)  — demo data + visible one-time codes
+# 1) backend  (http://localhost:8080)  — with sample data
 $env:SEED_DEMO = "true"
 mvn spring-boot:run
 
@@ -41,6 +41,8 @@ Demo photos are generated placeholders, not real properties.
 $env:SPRING_PROFILES_ACTIVE = "mysql"
 $env:DB_USERNAME = "root"; $env:DB_PASSWORD = "your-password"
 ```
+Or run `.start-mysql.ps1`: it asks for the MySQL password and starts the backend (MySQL, sample data on first run) and the frontend.
+
 This uses a **new** database `haven_realty` (created by Flyway), so it never touches the old desktop database. To bring old desktop data across, see `docs/import_from_desktop.sql` (read the assumptions at the top first).
 
 ### Configuration (environment variables)

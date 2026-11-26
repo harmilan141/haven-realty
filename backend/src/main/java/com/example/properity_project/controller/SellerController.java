@@ -83,7 +83,7 @@ public class SellerController {
         return properties.setActive(u, id, true);
     }
 
-    // Seller <-> Agent channel (the only conversation a seller can ever see)
+    // seller <-> agent chat
 
     @GetMapping("/messages")
     public List<Map<String, Object>> messages(@AuthenticationPrincipal User u) {

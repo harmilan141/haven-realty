@@ -110,7 +110,7 @@ public class AgentService {
         });
     }
 
-    // ------------------------------------------------------------------ Excel / PDF export (kept from the desktop app)
+    // Excel / PDF export (kept from the desktop app)
 
     private record Table(String title, List<String> headers, List<List<String>> rows) {}
 

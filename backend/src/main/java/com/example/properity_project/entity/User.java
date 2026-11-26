@@ -11,10 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * One row per person. A customer is a buyer and may also be a seller (flags), so there is never a
- * second account for the same person. The single agent is the only row with role AGENT.
- */
+// A customer can be both buyer and seller (flags) on one account. Only the agent has role AGENT.
 @Entity
 @Table(name = "users")
 @Getter

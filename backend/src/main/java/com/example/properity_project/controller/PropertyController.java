@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** Public catalogue. Only PUBLISHED listings are returned; no seller details are ever included. */
+/** Public listings - published only, without seller details. */
 @RestController
 @RequestMapping("/api/properties")
 @RequiredArgsConstructor

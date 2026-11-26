@@ -12,8 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Provisions THE agent account from AGENT_EMAIL / AGENT_PASSWORD. There is no signup route for agents.
- * If an agent already exists, a second one is never created.
+ * Creates the agent account from AGENT_EMAIL / AGENT_PASSWORD (agents can't sign up).
+ * Skipped if an agent already exists.
  */
 @Component
 @Order(1)

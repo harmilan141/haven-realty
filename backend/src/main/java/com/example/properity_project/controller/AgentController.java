@@ -36,7 +36,7 @@ public class AgentController {
     public record Reason(String reason) {}
     public record Msg(@NotBlank String body, Long propertyId) {}
 
-    // ---- dashboard, audit, export
+    // dashboard, audit, export
 
     @GetMapping("/dashboard")
     public Map<String, Object> dashboard() {
@@ -63,7 +63,7 @@ public class AgentController {
                 .body(agent.exportPdf(what));
     }
 
-    // ---- customers
+    // customers
 
     @GetMapping("/customers")
     public Page<AgentService.AgentCustomer> customers(@RequestParam(required = false) String q,
@@ -98,7 +98,7 @@ public class AgentController {
         return channels.agentSend(a, id, m.body(), m.propertyId());
     }
 
-    // ---- seller verification
+    // seller verification
 
     @GetMapping("/verifications")
     public Page<AgentVerification> verifications(@RequestParam(required = false) List<String> status,
@@ -122,7 +122,7 @@ public class AgentController {
         return verifications.decide(a, id, req);
     }
 
-    // ---- properties
+    // properties
 
     @GetMapping("/properties")
     public Page<AgentProperty> properties(@RequestParam(required = false) List<String> status,
@@ -157,7 +157,7 @@ public class AgentController {
         return properties.setStatus(a, id, c);
     }
 
-    // ---- enquiries (buyer <-> agent)
+    // enquiries (buyer <-> agent)
 
     @GetMapping("/enquiries")
     public Page<AgentEnquiry> enquiries(@RequestParam(required = false) List<String> status,
@@ -206,7 +206,7 @@ public class AgentController {
         return enquiries.offerStatus(a, id, req);
     }
 
-    // ---- sales and rentals
+    // sales and rentals
 
     @GetMapping("/sales")
     public List<SaleView> sales() {

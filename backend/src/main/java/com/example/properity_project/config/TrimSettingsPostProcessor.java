@@ -9,11 +9,7 @@ import org.springframework.core.env.MapPropertySource;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Hosting dashboards make it easy to paste a value with a hidden space or tab at either end
- * ("\tavnadmin" is a different database user). Trim the connection and secret settings so that
- * mistake can never stop the app from starting.
- */
+// Trims stray spaces/tabs from DB and secret settings pasted into hosting dashboards.
 public class TrimSettingsPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final String[] KEYS = {"spring.datasource.url", "spring.datasource.username",

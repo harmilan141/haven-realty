@@ -17,7 +17,7 @@ const routes = [];
 const route = (method, path, access, handler) =>
   routes.push({ method, access, handler, re: new RegExp(`^${path.replace(/\./g, '\\.').replace(/:\w+/g, '(\\d+)')}$`) });
 
-// ================================================================ lookups
+// lookups
 const byId = (db, table, id) => db[table].find((r) => r.id === Number(id));
 const need = (db, table, id, what) => byId(db, table, id) || notFound(what);
 const desc = (a, b) => b.id - a.id;
@@ -26,13 +26,13 @@ const agentUser = (db) => db.users.find((u) => u.role === 'AGENT');
 const list = (v) => (v == null || v === '' ? [] : [].concat(v).flatMap((x) => String(x).split(',')));
 const text = (v) => String(v ?? '').toLowerCase();
 
-// ================================================================ audit and notifications
+// audit and notifications
 const audit = (db, actorId, action, entityType, entityId, details = null) =>
   insert(db, 'audit', { actorId, action, entityType, entityId, details });
 const notify = (db, userId, title, body, link) => insert(db, 'notifications', { userId, title, body, link });
 const notifyAgent = (db, title, body, link) => agentUser(db) && notify(db, agentUser(db).id, title, body, link);
 
-// ================================================================ users
+// users
 const latestVerification = (db, userId) => db.verifications.filter((v) => v.userId === userId).sort(desc)[0];
 const sellerStatus = (db, u) => (u.role === 'AGENT' ? 'NONE' : u.sellerEnabled ? 'VERIFIED' : latestVerification(db, u.id)?.status || 'NONE');
 const userView = (db, u) => ({
@@ -46,7 +46,7 @@ const strongEnough = (p) => {
   if (!p || p.length < 8 || !/[A-Za-z]/.test(p) || !/\d/.test(p)) bad('Password must be at least 8 characters and contain a letter and a number');
 };
 
-// ================================================================ one-time codes (shown on screen: no email / SMS here)
+// one-time codes (shown on screen: no email / SMS here)
 function issueCode(db, user, channel, purpose) {
   db.tokens.filter((t) => t.userId === user.id && t.channel === channel && t.purpose === purpose && !t.usedAt).forEach((t) => { t.usedAt = stamp(); });
   const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0');
@@ -64,7 +64,7 @@ function consumeCode(db, user, channel, purpose, code) {
   t.usedAt = stamp();
 }
 
-// ================================================================ property views
+// property views
 const imagesOf = (db, pid) => db.images.filter((i) => i.propertyId === pid).sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id);
 const imageUrl = (pid, iid) => `/api/properties/${pid}/images/${iid}`;
 const savedIds = (db, viewer) => new Set(viewer && viewer.role !== 'AGENT' ? db.wishlist.filter((w) => w.userId === viewer.id).map((w) => w.propertyId) : []);
@@ -139,7 +139,7 @@ const owned = (db, u, id) => {
   return p && p.sellerId === u.id ? p : notFound('Property');
 };
 
-// ================================================================ enquiry views
+// enquiry views
 const system = (db, e, body) => insert(db, 'buyerMessages', { enquiryId: e.id, senderRole: 'SYSTEM', senderId: 0, body });
 const words = (s) => s.replace(/_/g, ' ').toLowerCase();
 function setStatus(db, e, status, reason, actorId, tellCustomer) {
@@ -168,7 +168,7 @@ const customerEnquiry = (db, e) => ({
 const myEnquiries = (db, u) => db.enquiries.filter((e) => e.customerId === u.id).sort(desc).map((e) => customerEnquiry(db, e));
 const ownEnquiry = (db, u, id) => {
   const e = byId(db, 'enquiries', id);
-  return e && e.customerId === u.id ? e : notFound('Enquiry'); // "not found" so other ids cannot be probed
+  return e && e.customerId === u.id ? e : notFound('Enquiry'); // 404 so other ids can't be guessed
 };
 const customerDetail = (db, e) => ({
   enquiry: customerEnquiry(db, e),
@@ -195,7 +195,7 @@ function agentDetail(db, id) {
   };
 }
 
-// ================================================================ seller verification views
+// seller verification views
 const verificationDocs = (db, id) => db.verificationDocs.filter((d) => d.verificationId === id && !d.superseded).map(docView);
 const historyOf = (db, id) => db.history.filter((h) => h.verificationId === id).map((h) => ({ fromStatus: h.fromStatus, toStatus: h.toStatus, note: h.note, at: h.createdAt }));
 const myVerification = (db, v) => v && ({
@@ -213,7 +213,7 @@ function transition(db, v, to, note, actor) {
   record(db, v, from, to, note, actor.id);
 }
 
-// ================================================================ agent views
+// agent views
 const agentCustomer = (db, u) => ({
   user: userView(db, u), sellerApplicationStatus: sellerStatus(db, u), propertyCount: db.properties.filter((p) => p.sellerId === u.id).length,
   enquiryCount: db.enquiries.filter((e) => e.customerId === u.id).length, accountEnabled: u.accountEnabled, joinedAt: u.createdAt,
@@ -241,7 +241,7 @@ function exportTable(db, what) {
   return notFound('Export');
 }
 
-// ================================================================ routes: auth and account
+// routes: auth and account
 route('GET', '/health', 'public', () => ({ status: 'ok', service: 'haven-realty-browser-demo' }));
 
 route('POST', '/auth/register', 'public', async ({ db, body: r }) => {
@@ -317,7 +317,7 @@ route('POST', '/account/notifications/:id/read', 'any', ({ db, user, ids: [id] }
   return { message: 'ok' };
 });
 
-// Demo only: lets visitors choose the agent login for their own browser, so no private password is ever published.
+// demo only: visitors pick their own agent login (stored in their browser)
 route('PUT', '/demo/agent-login', 'public', async ({ db, body: r }) => {
   validate(r, { email: [required('Email is required'), matches(EMAIL, 'Enter a valid email')], password: [required('Password is required'), [(v) => v.length >= 8 && v.length <= 72, 'Use 8 to 72 characters']] });
   const email = r.email.trim().toLowerCase();
@@ -329,7 +329,7 @@ route('PUT', '/demo/agent-login', 'public', async ({ db, body: r }) => {
   return { message: 'Agent login changed in this browser' };
 });
 
-// ================================================================ routes: public catalogue
+// routes: public catalogue
 route('GET', '/properties', 'public', ({ db, user, query: c }) => {
   const q = text(c.q).trim();
   let rows = db.properties.filter((p) => p.status === PUBLISHED);
@@ -387,7 +387,7 @@ route('GET', '/properties/:id/images/:imageId', 'public', ({ db, user, ids: [id,
   return db.files[img.storedName] || notFound('File');
 });
 
-// ================================================================ routes: private documents
+// routes: private documents
 route('GET', '/files/verification-documents/:id', 'any', ({ db, user, ids: [id], touch }) => {
   const d = need(db, 'verificationDocs', id, 'Document');
   const v = need(db, 'verifications', d.verificationId, 'Application');
@@ -405,7 +405,7 @@ route('GET', '/files/property-documents/:id', 'any', ({ db, user, ids: [id], tou
   return db.files[d.storedName] || notFound('File');
 });
 
-// ================================================================ routes: buyer
+// routes: buyer
 route('PUT', '/me', 'CUSTOMER', ({ db, user: u, body: r }) => {
   validate(r, { fullName: [required(), maxLen(120)], phone: [matches(/^\d{10}$/, 'Enter a 10-digit mobile number')], postalCode: [matches(/^(\d{6})?$/, 'Enter a 6-digit PIN code')], preferences: [maxLen(1000)] });
   if (r.phone !== u.phone) {
@@ -507,7 +507,7 @@ route('POST', '/me/enquiries/:id/cancel', 'CUSTOMER', ({ db, user, ids: [id] }) 
   return customerDetail(db, e);
 });
 
-// ================================================================ routes: seller
+// routes: seller
 route('GET', '/seller/dashboard', 'CUSTOMER', ({ db, user }) => {
   requireSeller(user);
   const mine = db.properties.filter((p) => p.sellerId === user.id);
@@ -601,7 +601,7 @@ route('POST', '/seller/messages', 'CUSTOMER', ({ db, user, body: r }) => {
   return sellerMessage(m);
 });
 
-// ================================================================ routes: agent
+// routes: agent
 route('GET', '/agent/dashboard', 'AGENT', ({ db }) => {
   const customers = db.users.filter((u) => u.role === 'CUSTOMER');
   const sellers = customers.filter((u) => u.sellerEnabled).length;
@@ -822,7 +822,7 @@ route('PUT', '/agent/offers/:id', 'AGENT', ({ db, user, ids: [id], body: r }) =>
   return agentDetail(db, o.enquiryId);
 });
 
-// ================================================================ routes: sales and rentals (a completed deal marks the property sold)
+// routes: sales and rentals (a completed deal marks the property sold)
 const SALE_RULES = { finalAmount: [required(), atLeast(1)], downPayment: [atLeast(0)], dealDate: [required()], totalCommission: [atLeast(0)] };
 const saleFields = (r) => {
   const down = Number(r.downPayment || 0);
@@ -911,7 +911,7 @@ route('PUT', '/agent/rentals/:id', 'AGENT', ({ db, user, ids: [id], body: r }) =
   return rentalView(db, rental);
 });
 
-// ================================================================ dispatch
+// dispatch
 function signedIn(db, header) {
   const [, id, expires] = /^Bearer demo\.(\d+)\.(\d+)$/.exec(header || '') || [];
   const u = id && Number(expires) > Date.now() ? byId(db, 'users', id) : null;
@@ -940,7 +940,7 @@ async function handle(config) {
   let dirty = method !== 'GET';
   try {
     const result = await found.handler({ db, user, query, body, form: form || new FormData(), ids: match.slice(1).map(Number), touch: () => { dirty = true; } });
-    // copy before saving so the page can never hold a reference into the stored data
+    // copy so the page doesn't hold a reference to stored data
     const out = result instanceof Blob ? result : JSON.parse(JSON.stringify(result));
     if (dirty) await save(db);
     return out;

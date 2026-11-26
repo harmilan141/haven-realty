@@ -15,10 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Stores uploads OUTSIDE any web-served folder under random names. Files are only ever handed back
- * through controllers that have already checked who is asking.
- */
+// Uploads are saved outside the web root with random names and only served through controllers.
 @Service
 public class FileStorageService {
 

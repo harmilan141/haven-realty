@@ -12,7 +12,7 @@ public final class VerificationDtos {
 
     public record HistoryView(String fromStatus, String toStatus, String note, LocalDateTime at) {}
 
-    /** What the applicant sees: never the agent's internal review notes. */
+    /** Applicant view (without the agent's internal notes). */
     public record MyVerification(Long id, String status, String rejectionReason, boolean consentGiven,
                                  LocalDateTime submittedAt, LocalDateTime reviewedAt,
                                  List<DocView> documents, List<HistoryView> history) {}

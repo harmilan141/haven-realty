@@ -15,10 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The Seller <-> Agent channel. It is keyed by seller id only, so there is no path in the schema that
- * could connect a seller to a buyer's conversation (those live in buyer_agent_messages).
- */
+// Seller <-> agent chat, keyed by seller id. Kept separate from buyer_agent_messages.
 @Service
 @RequiredArgsConstructor
 public class ChannelService {

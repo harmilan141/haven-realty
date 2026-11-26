@@ -17,8 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Seller verification. Uploading documents NEVER verifies anyone: only the agent's APPROVE decision
- * flips users.seller_enabled.
+ * Seller verification. Only the agent approving sets users.seller_enabled (uploading docs isn't enough).
  */
 @Service
 @RequiredArgsConstructor
@@ -83,7 +82,7 @@ public class SellerVerificationService {
         return verifications.findFirstByUserIdOrderByIdDesc(user.getId()).map(this::view).orElse(null);
     }
 
-    // ---------------------------------------------------------------- agent side
+    // agent side
 
     public Page<AgentVerification> list(List<String> statuses, int page, int size) {
         List<String> wanted = statuses == null || statuses.isEmpty()
@@ -144,7 +143,7 @@ public class SellerVerificationService {
         return d;
     }
 
-    // ---------------------------------------------------------------- helpers
+    // helpers
 
     private SellerVerification find(Long id) {
         return verifications.findById(id).orElseThrow(() -> Errors.notFound("Application"));

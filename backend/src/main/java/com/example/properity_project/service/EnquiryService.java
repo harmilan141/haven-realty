@@ -21,8 +21,7 @@ import java.util.Set;
  * NEW -> UNDER_REVIEW -> CONTACTED -> DETAILS_SHARED -> SITE_VISIT_SCHEDULED -> NEGOTIATION
  *     -> DEAL_IN_PROGRESS -> CLOSED, plus REJECTED / ON_HOLD / CANCELLED.
  *
- * Privacy: customer-facing methods only ever return the customer's OWN enquiries and the non-internal
- * messages; seller identity is never part of any customer DTO.
+ * Customers only get their own enquiries and non-internal messages.
  */
 @Service
 @RequiredArgsConstructor
@@ -44,7 +43,7 @@ public class EnquiryService {
     private final NotificationService notifications;
     private final AuditService audit;
 
-    // ================================================================ customer side
+    // customer side
 
     @Transactional
     public CustomerEnquiry create(User customer, CreateEnquiry req) {
@@ -99,12 +98,12 @@ public class EnquiryService {
     }
 
     private Enquiry ownedBy(User customer, Long id) {
-        // not-found (not forbidden) so ids of other people's enquiries cannot be probed
+        // 404 instead of 403 so other ids can't be guessed
         return enquiries.findById(id).filter(e -> e.getCustomerId().equals(customer.getId()))
                 .orElseThrow(() -> Errors.notFound("Enquiry"));
     }
 
-    // ================================================================ agent side
+    // agent side
 
     public Page<AgentEnquiry> agentList(List<String> statuses, int page, int size) {
         List<String> wanted = statuses == null || statuses.isEmpty() ? List.copyOf(STATUSES) : statuses;
@@ -218,7 +217,7 @@ public class EnquiryService {
         enquiries.findById(enquiryId).ifPresent(e -> setStatus(e, status, reason, actorId, true));
     }
 
-    // ================================================================ helpers
+    // helpers
 
     private Enquiry find(Long id) {
         return enquiries.findById(id).orElseThrow(() -> Errors.notFound("Enquiry"));

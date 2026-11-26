@@ -29,7 +29,7 @@ public class MeController {
     private final EnquiryService enquiries;
     private final NotificationService notifications;
 
-    // ---- profile & verification
+    // profile & verification
 
     @PutMapping
     public UserView update(@AuthenticationPrincipal User user, @Valid @RequestBody ProfileUpdate req) {
@@ -47,7 +47,7 @@ public class MeController {
         return auth.resend(user, body.getOrDefault("channel", "EMAIL"));
     }
 
-    // ---- seller application (same account, separate verification status)
+    // seller application (same account, separate verification status)
 
     @GetMapping("/seller-application")
     public MyVerification application(@AuthenticationPrincipal User user) {
@@ -63,7 +63,7 @@ public class MeController {
         return verification.submit(user, consent, identity, address, photo);
     }
 
-    // ---- wishlist / recently viewed / dashboard
+    // wishlist / recently viewed / dashboard
 
     @GetMapping("/wishlist")
     public List<PropertyCard> wishlist(@AuthenticationPrincipal User user) {
@@ -100,7 +100,7 @@ public class MeController {
         return m;
     }
 
-    // ---- enquiries (buyer <-> agent)
+    // enquiries (buyer <-> agent)
 
     @PostMapping("/enquiries")
     public CustomerEnquiry createEnquiry(@AuthenticationPrincipal User user, @Valid @RequestBody CreateEnquiry req) {

@@ -52,7 +52,7 @@ public class AuthenticationService {
                 otp.isExposed() ? emailCode : null, otp.isExposed() ? phoneCode : null);
     }
 
-    /** portal = CUSTOMER or AGENT. A customer's credentials never work on the agent portal and vice versa. */
+    /** portal = CUSTOMER or AGENT. Customer logins don't work on the agent portal and vice versa. */
     public AuthResponse login(LoginRequest r) {
         String email = r.email().trim().toLowerCase();
         authManager.authenticate(new UsernamePasswordAuthenticationToken(email, r.password()));
@@ -85,7 +85,7 @@ public class AuthenticationService {
         return out;
     }
 
-    /** Always answers the same way so it cannot be used to discover which emails are registered. */
+    /** Same response either way, so it doesn't reveal which emails exist. */
     @Transactional
     public java.util.Map<String, Object> forgotPassword(ForgotRequest r) {
         var out = new java.util.HashMap<String, Object>();

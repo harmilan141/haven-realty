@@ -25,10 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * URL-level rules (first line of defence). Every service method re-checks ownership too, so a
- * wrong URL rule can never expose another user's data.
- */
+// URL rules. Services also check ownership, so this isn't the only check.
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -57,7 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/agent/**").hasRole("AGENT")
                 .requestMatchers("/api/seller/**", "/api/me/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()) // the built web app (static files); all data lives under /api
+                .anyRequest().permitAll()) // static frontend files
             .exceptionHandling(e -> e.authenticationEntryPoint((req, res, ex) -> {
                 res.setStatus(401);
                 res.setContentType("application/json");

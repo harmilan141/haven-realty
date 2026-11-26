@@ -34,7 +34,7 @@ public class RecordsService {
     private final NotificationService notifications;
     private final AuditService audit;
 
-    // ------------------------------------------------------------------ sales
+    // sales
 
     public List<SaleView> sales() {
         return sales.findAll(Sort.by("id").descending()).stream().map(this::view).toList();
@@ -112,7 +112,7 @@ public class RecordsService {
         }
     }
 
-    // ------------------------------------------------------------------ rentals
+    // rentals
 
     public List<RentalView> rentals() {
         return rentals.findAll(Sort.by("id").descending()).stream().map(this::view).toList();
@@ -160,7 +160,7 @@ public class RecordsService {
         return view(r);
     }
 
-    // ------------------------------------------------------------------ mapping
+    // mapping
 
     private SaleView view(SaleTransaction t) {
         Property p = properties.findById(t.getPropertyId()).orElseThrow();

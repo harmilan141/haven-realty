@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * Listing lifecycle: DRAFT -> SUBMITTED -> UNDER_REVIEW -> PUBLISHED (approved) | REJECTED,
  * and PUBLISHED <-> INACTIVE / SUSPENDED, PUBLISHED -> SOLD.
- * Only PUBLISHED listings are ever visible to customers.
+ * Customers only see PUBLISHED listings.
  */
 @Service
 @RequiredArgsConstructor
@@ -50,7 +50,7 @@ public class PropertyService {
                                  BigDecimal minPrice, BigDecimal maxPrice, BigDecimal minArea, BigDecimal maxArea,
                                  String sort) {}
 
-    // ================================================================ public / customer
+    // public / customer
 
     public Page<PropertyCard> search(SearchCriteria c, int page, int size, User viewer) {
         Specification<Property> spec = (root, query, cb) -> {
@@ -145,7 +145,7 @@ public class PropertyService {
                 .limit(6).map(p -> card(p, saved)).toList();
     }
 
-    // ---- wishlist
+    // wishlist
 
     @Transactional
     public void addToWishlist(User user, Long propertyId) {
@@ -168,7 +168,7 @@ public class PropertyService {
                 .filter(p -> p != null && PUBLISHED.equals(p.getStatus())).map(p -> card(p, saved)).toList();
     }
 
-    // ================================================================ seller
+    // seller
 
     private void requireSeller(User u) {
         if (!u.isSellerEnabled()) throw Errors.forbidden("Your seller verification must be approved before you can list properties");
@@ -291,7 +291,7 @@ public class PropertyService {
         return m;
     }
 
-    // ================================================================ agent
+    // agent
 
     public Page<AgentProperty> adminList(List<String> statuses, String q, int page, int size) {
         List<String> wanted = statuses == null || statuses.isEmpty()
@@ -391,7 +391,7 @@ public class PropertyService {
         return d;
     }
 
-    // ================================================================ mapping helpers
+    // mapping helpers
 
     private void apply(Property p, PropertyInput in) {
         String type = in.propertyType().trim();

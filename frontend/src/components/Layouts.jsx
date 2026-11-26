@@ -21,7 +21,7 @@ export function Logo({ light }) {
 /** Where a signed-in person lands. */
 export const homeFor = (u) => (u?.role === 'AGENT' ? '/agent' : '/account');
 
-/* ------------------------------------------------------------------ public */
+// public
 export function PublicLayout() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
@@ -76,7 +76,7 @@ export function PublicLayout() {
   );
 }
 
-/* ------------------------------------------------------------------ portals */
+// portals
 const nav = {
   buyer: [
     ['/account', 'Dashboard', LayoutDashboard, true], ['/properties', 'Browse', Search], ['/account/wishlist', 'Wishlist', Heart],

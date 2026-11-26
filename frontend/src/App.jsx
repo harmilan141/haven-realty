@@ -29,7 +29,7 @@ const AgentSales = lazy(() => import('./pages/agent/Sales.jsx'));
 const AgentRentals = lazy(() => import('./pages/agent/Rentals.jsx'));
 const AgentAudit = lazy(() => import('./pages/agent/Audit.jsx'));
 
-/** Client-side guard for UX only. The real enforcement is on the server for every API call. */
+// UI-only guard, the server does the real checks
 function Guard({ role, seller, children }) {
   const { user, ready } = useAuth();
   const loc = useLocation();

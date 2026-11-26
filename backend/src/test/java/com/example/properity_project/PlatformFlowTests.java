@@ -37,7 +37,7 @@ class PlatformFlowTests {
     static final byte[] PNG = {(byte) 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 0, 0};
     static final byte[] PDF = "%PDF-1.4 test".getBytes();
 
-    // ------------------------------------------------------------ helpers
+    // helpers
 
     JsonNode body(ResultActions r) throws Exception {
         return json.readTree(r.andReturn().getResponse().getContentAsString());
@@ -73,7 +73,7 @@ class PlatformFlowTests {
                 .andExpect(status().isOk())).get("token").asText();
     }
 
-    // ------------------------------------------------------------ tests
+    // tests
 
     @BeforeAll
     static void clean() {

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-/** Public endpoints. Note: there is deliberately NO agent registration route. */
+/** Public auth endpoints (no agent registration). */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

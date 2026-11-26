@@ -14,7 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/** Reads the bearer token. Bad, expired or disabled-account tokens simply leave the request anonymous. */
+/** Reads the bearer token. Invalid or expired tokens just leave the request anonymous. */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (Exception ignored) {
-                // invalid token -> treated as anonymous; protected routes will answer 401
+                // bad token, treat as anonymous (protected routes return 401)
             }
         }
         chain.doFilter(request, response);

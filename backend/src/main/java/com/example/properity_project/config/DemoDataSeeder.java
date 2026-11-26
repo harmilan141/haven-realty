@@ -3,12 +3,15 @@ package com.example.properity_project.config;
 import com.example.properity_project.entity.*;
 import com.example.properity_project.repository.*;
 import com.example.properity_project.service.FileStorageService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -16,9 +19,14 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Order(2)
@@ -27,19 +35,32 @@ import java.time.LocalDateTime;
 public class DemoDataSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
+    private static final String PASSWORD = "Demo@12345";
 
     private final UserRepository users;
     private final PropertyRepository properties;
     private final PropertyImageRepository images;
     private final PropertyDocumentRepository docs;
+    private final PropertyApprovalRepository approvals;
     private final EnquiryRepository enquiries;
     private final BuyerAgentMessageRepository messages;
+    private final SellerAgentMessageRepository sellerMessages;
     private final SellerVerificationRepository verifications;
     private final VerificationDocumentRepository verificationDocs;
+    private final VerificationHistoryRepository verificationHistory;
     private final SiteVisitRepository visits;
+    private final PropertyOfferRepository offers;
     private final WishlistItemRepository wishlist;
+    private final RecentlyViewedRepository recent;
+    private final SaleTransactionRepository sales;
+    private final RentalAgreementRepository rentals;
+    private final NotificationRepository notifications;
+    private final AuditLogRepository audit;
     private final PasswordEncoder encoder;
     private final FileStorageService storage;
+    private final ObjectMapper mapper;
+
+    private final LocalDateTime now = LocalDateTime.now();
 
     @Override
     public void run(String... args) throws Exception {
@@ -47,44 +68,181 @@ public class DemoDataSeeder implements CommandLineRunner {
             repairMissingFiles();
             return;
         }
-
-        if (users.countByRole("AGENT") == 0) {
-            users.save(User.builder().fullName("Aarav Kapoor").email("agent@haven.test").password(encoder.encode("Agent@12345"))
-                    .phone("9000000000").city("Chandigarh").state("Punjab").role("AGENT").emailVerified(true).phoneVerified(true)
-                    .buyerEnabled(false).build());
+        JsonNode data;
+        try (InputStream in = new ClassPathResource("seed/sample-data.json").getInputStream()) {
+            data = mapper.readTree(in);
         }
-        User s1 = customer("Meera Sharma", "meera@haven.test", "9811100001", "Chandigarh", true);
-        User s2 = customer("Rohan Gill", "rohan@haven.test", "9811100002", "Mohali", true);
-        User b1 = customer("Priya Malhotra", "priya@haven.test", "9811100003", "Panchkula", false);
-        User b2 = customer("Kabir Singh", "kabir@haven.test", "9811100004", "Chandigarh", false);
-        User applicant = customer("Neha Verma", "neha@haven.test", "9811100005", "Zirakpur", false);
 
-        for (User s : new User[]{s1, s2}) {
-            SellerVerification v = verifications.save(SellerVerification.builder().userId(s.getId()).status("VERIFIED").consentGiven(true).build());
-            verificationDocs.save(doc(v.getId(), "IDENTITY"));
+        User agent = users.findFirstByRole("AGENT").orElseGet(() -> users.save(User.builder().fullName("Aarav Kapoor")
+                .email("agent@haven.test").password(encoder.encode("Agent@12345")).phone("9000000000").city("Chandigarh")
+                .state("Punjab").role("AGENT").emailVerified(true).phoneVerified(true).buyerEnabled(false).build()));
+
+        String hash = encoder.encode(PASSWORD);
+        Map<String, Long> userIds = new HashMap<>();
+        userIds.put("agent", agent.getId());
+        for (JsonNode u : data.get("users")) {
+            User saved = users.save(User.builder().fullName(text(u, "fullName")).email(text(u, "email")).password(hash)
+                    .phone(text(u, "phone")).address(text(u, "address")).city(text(u, "city")).state(text(u, "state"))
+                    .postalCode(text(u, "postalCode")).dateOfBirth(LocalDate.parse(text(u, "dob"))).role("CUSTOMER")
+                    .emailVerified(u.get("emailVerified").asBoolean()).phoneVerified(u.get("phoneVerified").asBoolean())
+                    .buyerEnabled(true).sellerEnabled(u.get("sellerEnabled").asBoolean())
+                    .accountEnabled(u.get("accountEnabled").asBoolean()).preferences(text(u, "preferences"))
+                    .createdAt(ago(u, "createdDaysAgo")).build());
+            userIds.put(saved.getEmail(), saved.getId());
         }
-        SellerVerification pending = verifications.save(SellerVerification.builder().userId(applicant.getId()).status("PENDING").consentGiven(true).build());
-        verificationDocs.save(doc(pending.getId(), "IDENTITY"));
-        verificationDocs.save(doc(pending.getId(), "ADDRESS"));
 
-        Property p1 = property(s1, "The Courtyard House", "Villa", "SALE", "Chandigarh", "Sector 8", 38500000, 3200, 4, 4, "Semi-furnished", true, "Private garden,Lift,Power backup,24x7 security", new Color(0x1f3a5f), "PUBLISHED");
-        property(s1, "Sunlit apartment near Rock Garden", "Apartment", "SALE", "Chandigarh", "Sector 16", 14200000, 1680, 3, 2, "Furnished", true, "Gym,Clubhouse,Lift", new Color(0x2d5a7b), "PUBLISHED");
-        Property p3 = property(s2, "Garden-view independent floor", "House", "RENT", "Mohali", "Sector 66", 48000, 2100, 3, 3, "Semi-furnished", true, "Garden,Parking,Modular kitchen", new Color(0x3b6e5b), "PUBLISHED");
-        property(s2, "Designed for slow mornings", "Apartment", "SALE", "Panchkula", "Sector 20", 9600000, 1250, 2, 2, "Unfurnished", true, "Park facing,Lift", new Color(0x6b5b3b), "PUBLISHED");
-        property(s1, "The open-plan residence", "Villa", "RENT", "Chandigarh", "Sector 5", 85000, 2850, 4, 3, "Furnished", true, "Garden,Terrace,Servant quarter", new Color(0x4a3f6b), "PUBLISHED");
-        property(s2, "A home with room to grow", "House", "SALE", "Zirakpur", "VIP Road", 7800000, 1900, 3, 2, "Unfurnished", true, "Gated society,Park", new Color(0x7b3f3f), "PUBLISHED");
-        property(s2, "Commercial showroom on main road", "Commercial", "SALE", "Mohali", "Phase 7", 21500000, 1500, 0, 2, "Unfurnished", true, "Corner plot,Ample parking", new Color(0x35505e), "PUBLISHED");
-        property(s1, "Two-bedroom flat awaiting review", "Apartment", "RENT", "Chandigarh", "Sector 35", 32000, 1100, 2, 2, "Semi-furnished", false, "Lift", new Color(0x555555), "SUBMITTED");
+        List<Long> verificationIds = new ArrayList<>();
+        for (JsonNode v : data.get("verifications")) {
+            SellerVerification sv = verifications.save(SellerVerification.builder().userId(userIds.get(text(v, "user")))
+                    .status(text(v, "status")).rejectionReason(text(v, "rejectionReason")).reviewNotes(text(v, "reviewNotes"))
+                    .consentGiven(true).submittedAt(ago(v, "submittedDaysAgo"))
+                    .reviewedAt(v.hasNonNull("reviewedDaysAgo") ? ago(v, "reviewedDaysAgo") : null)
+                    .updatedAt(v.hasNonNull("reviewedDaysAgo") ? ago(v, "reviewedDaysAgo") : ago(v, "submittedDaysAgo")).build());
+            verificationIds.add(sv.getId());
+            for (JsonNode type : v.get("docs")) {
+                var s = storage.storeBytes(("%PDF-1.4 sample " + type.asText().toLowerCase()).getBytes(), "pdf", "application/pdf",
+                        type.asText().toLowerCase() + ".pdf");
+                verificationDocs.save(VerificationDocument.builder().verificationId(sv.getId()).docType(type.asText())
+                        .storedName(s.storedName()).originalName(s.originalName()).contentType(s.contentType())
+                        .sizeBytes(s.size()).uploadedAt(sv.getSubmittedAt()).build());
+            }
+            for (JsonNode h : v.get("history")) {
+                verificationHistory.save(VerificationHistory.builder().verificationId(sv.getId()).fromStatus(text(h, "from"))
+                        .toStatus(text(h, "to")).note(text(h, "note"))
+                        .actorId("PENDING".equals(text(h, "to")) ? sv.getUserId() : agent.getId())
+                        .createdAt(ago(h, "daysAgo")).build());
+            }
+        }
 
-        Enquiry e = enquiries.save(Enquiry.builder().propertyId(p1.getId()).customerId(b1.getId()).enquiryType("BUY")
-                .message("Hello, I am interested in this villa. Is the price negotiable?").status("CONTACTED").build());
-        messages.save(BuyerAgentMessage.builder().enquiryId(e.getId()).senderRole("CUSTOMER").senderId(b1.getId()).body(e.getMessage()).build());
-        messages.save(BuyerAgentMessage.builder().enquiryId(e.getId()).senderRole("SYSTEM").senderId(0L).body("Your enquiry was received. Our agent will contact you shortly.").build());
-        messages.save(BuyerAgentMessage.builder().enquiryId(e.getId()).senderRole("AGENT").senderId(1L).body("Thank you Priya, I will call you today with details.").build());
-        enquiries.save(Enquiry.builder().propertyId(p3.getId()).customerId(b2.getId()).enquiryType("SITE_VISIT")
-                .message("Could we visit this Saturday morning?").status("NEW").build());
-        wishlist.save(WishlistItem.builder().userId(b1.getId()).propertyId(p3.getId()).build());
-        log.info("Demo data created. Sign in as priya@haven.test / Demo@12345 (buyer), meera@haven.test (seller), agent@haven.test / Agent@12345");
+        List<Property> props = new ArrayList<>();
+        for (JsonNode p : data.get("properties")) {
+            LocalDateTime created = ago(p, "createdDaysAgo");
+            Property saved = properties.save(Property.builder().sellerId(userIds.get(text(p, "seller"))).title(text(p, "title"))
+                    .propertyType(text(p, "type")).category(text(p, "category")).description(text(p, "description"))
+                    .city(text(p, "city")).locality(text(p, "locality")).address(text(p, "address")).postalCode(text(p, "postalCode"))
+                    .area(p.get("area").decimalValue()).measurementUnit(text(p, "unit")).price(p.get("price").decimalValue())
+                    .bedrooms(p.get("bedrooms").asInt()).bathrooms(p.get("bathrooms").asInt()).furnishingStatus(text(p, "furnishing"))
+                    .parkingAvailable(p.get("parking").asBoolean()).amenities(text(p, "amenities")).facing(text(p, "facing"))
+                    .approvedBy(text(p, "approvedBy")).constructionType(text(p, "construction")).status(text(p, "status"))
+                    .rejectionReason(text(p, "rejectionReason")).viewCount(p.get("viewCount").asInt())
+                    .createdAt(created).updatedAt(created).build());
+            props.add(saved);
+            Color colour = Color.decode(text(p, "colour"));
+            for (int i = 0; i < 2; i++) {
+                var s = storage.storeBytes(render(saved.getTitle(), saved.getLocality() + ", " + saved.getCity(), colour, i),
+                        "png", "image/png", "photo" + (i + 1) + ".png");
+                images.save(PropertyImage.builder().propertyId(saved.getId()).storedName(s.storedName()).originalName(s.originalName())
+                        .contentType("image/png").sortOrder(i).build());
+            }
+            var d = storage.storeBytes("%PDF-1.4 sample ownership".getBytes(), "pdf", "application/pdf", "ownership.pdf");
+            docs.save(PropertyDocument.builder().propertyId(saved.getId()).docType("OWNERSHIP").storedName(d.storedName())
+                    .originalName(d.originalName()).contentType(d.contentType()).uploadedAt(created).build());
+            for (JsonNode a : p.get("approvals")) {
+                approvals.save(PropertyApproval.builder().propertyId(saved.getId()).decision(text(a, "decision"))
+                        .reason(text(a, "reason")).actorId(agent.getId()).createdAt(ago(a, "daysAgo")).build());
+            }
+        }
+
+        List<Enquiry> enqs = new ArrayList<>();
+        for (JsonNode e : data.get("enquiries")) {
+            Long customer = userIds.get(text(e, "customer"));
+            LocalDateTime created = ago(e, "createdDaysAgo");
+            LocalDateTime updated = created;
+            for (JsonNode m : e.get("messages")) if (ago(m, "daysAgo").isAfter(updated)) updated = ago(m, "daysAgo");
+            Enquiry saved = enquiries.save(Enquiry.builder().propertyId(props.get(e.get("property").asInt()).getId())
+                    .customerId(customer).enquiryType(text(e, "type")).message(text(e, "message")).status(text(e, "status"))
+                    .priority(text(e, "priority")).closureReason(text(e, "closureReason"))
+                    .followUpDate(e.hasNonNull("followUpInDays") ? LocalDate.now().plusDays(e.get("followUpInDays").asLong()) : null)
+                    .createdAt(created).updatedAt(updated).build());
+            enqs.add(saved);
+            for (JsonNode m : e.get("messages")) {
+                String role = text(m, "role");
+                Long sender = switch (role) { case "AGENT" -> agent.getId(); case "CUSTOMER" -> customer; default -> 0L; };
+                messages.save(BuyerAgentMessage.builder().enquiryId(saved.getId()).senderRole(role).senderId(sender)
+                        .body(text(m, "body")).internalNote(m.path("internal").asBoolean(false)).createdAt(ago(m, "daysAgo")).build());
+            }
+            for (JsonNode v : e.get("visits")) {
+                LocalDateTime at = LocalDate.now().plusDays(v.get("inDays").asLong()).atTime(v.get("hour").asInt(), 0);
+                visits.save(SiteVisit.builder().enquiryId(saved.getId()).scheduledAt(at).status(text(v, "status"))
+                        .notes(text(v, "notes")).createdAt(created).build());
+            }
+            for (JsonNode o : e.get("offers")) {
+                offers.save(PropertyOffer.builder().enquiryId(saved.getId()).amount(o.get("amount").decimalValue())
+                        .note(text(o, "note")).status(text(o, "status")).createdAt(ago(o, "daysAgo")).build());
+            }
+        }
+
+        for (JsonNode s : data.get("sales")) {
+            Enquiry e = enqs.get(s.get("enquiry").asInt());
+            Property p = props.stream().filter(x -> x.getId().equals(e.getPropertyId())).findFirst().orElseThrow();
+            LocalDate registry = s.hasNonNull("registryDaysAgo") ? LocalDate.now().minusDays(s.get("registryDaysAgo").asLong())
+                    : s.hasNonNull("registryInDays") ? LocalDate.now().plusDays(s.get("registryInDays").asLong()) : null;
+            sales.save(SaleTransaction.builder().enquiryId(e.getId()).propertyId(p.getId()).buyerId(e.getCustomerId())
+                    .sellerId(p.getSellerId()).finalAmount(s.get("finalAmount").decimalValue())
+                    .downPayment(s.get("downPayment").decimalValue()).dealDate(LocalDate.now().minusDays(s.get("dealDaysAgo").asLong()))
+                    .registryDate(registry).totalCommission(s.get("commission").decimalValue())
+                    .advanceReceived(s.get("advance").asBoolean()).balanceReceived(s.get("balance").asBoolean())
+                    .status(text(s, "status")).notes(text(s, "notes")).createdAt(ago(s, "dealDaysAgo")).build());
+        }
+
+        for (JsonNode r : data.get("rentals")) {
+            Enquiry e = enqs.get(r.get("enquiry").asInt());
+            LocalDate start = LocalDate.now().minusDays(r.get("startDaysAgo").asLong());
+            LocalDate end = start.plusDays(r.get("lengthDays").asLong());
+            rentals.save(RentalAgreement.builder().enquiryId(e.getId()).propertyId(e.getPropertyId()).tenantId(e.getCustomerId())
+                    .rentAmount(r.get("rent").decimalValue()).securityDeposit(r.get("deposit").decimalValue())
+                    .startDate(start).endDate(end).renewalDate(end.minusDays(r.get("renewalDaysBeforeEnd").asLong()))
+                    .status(text(r, "status")).notes(text(r, "notes")).createdAt(start.atTime(11, 0)).build());
+        }
+
+        for (JsonNode w : data.get("wishlist")) {
+            wishlist.save(WishlistItem.builder().userId(userIds.get(w.get(0).asText())).propertyId(props.get(w.get(1).asInt()).getId())
+                    .createdAt(daysAgo(w.get(2).asDouble())).build());
+        }
+        for (JsonNode w : data.get("recent")) {
+            recent.save(RecentlyViewed.builder().userId(userIds.get(w.get(0).asText())).propertyId(props.get(w.get(1).asInt()).getId())
+                    .viewedAt(daysAgo(w.get(2).asDouble())).build());
+        }
+        for (JsonNode m : data.get("sellerMessages")) {
+            Long seller = userIds.get(text(m, "seller"));
+            boolean fromSeller = "CUSTOMER".equals(text(m, "role"));
+            sellerMessages.save(SellerAgentMessage.builder().sellerId(seller)
+                    .propertyId(m.hasNonNull("property") ? props.get(m.get("property").asInt()).getId() : null)
+                    .senderRole(fromSeller ? "SELLER" : "AGENT").senderId(fromSeller ? seller : agent.getId())
+                    .body(text(m, "body")).createdAt(ago(m, "daysAgo")).build());
+        }
+        for (JsonNode n : data.get("notifications")) {
+            notifications.save(Notification.builder().userId(userIds.get(text(n, "user"))).title(text(n, "title"))
+                    .body(text(n, "body")).link(text(n, "link")).readFlag(n.get("read").asBoolean()).createdAt(ago(n, "daysAgo")).build());
+        }
+        for (JsonNode a : data.get("audit")) {
+            JsonNode ref = a.get("ref");
+            String kind = ref.get(0).asText();
+            Long entityId = switch (kind) {
+                case "user" -> userIds.get(ref.get(1).asText());
+                case "verification" -> verificationIds.get(ref.get(1).asInt());
+                case "property" -> props.get(ref.get(1).asInt()).getId();
+                case "enquiry" -> enqs.get(ref.get(1).asInt()).getId();
+                default -> null;
+            };
+            audit.save(AuditLog.builder().actorId(userIds.get(text(a, "actor"))).action(text(a, "action")).entityType(text(a, "entity"))
+                    .entityId(entityId).details(text(a, "details")).createdAt(ago(a, "daysAgo")).build());
+        }
+        log.info("Sample data created: {} customers, {} properties, {} enquiries. Customer password {}, agent agent@haven.test / Agent@12345",
+                userIds.size() - 1, props.size(), enqs.size(), PASSWORD);
+    }
+
+    private static String text(JsonNode n, String field) {
+        JsonNode v = n.get(field);
+        return v == null || v.isNull() ? null : v.asText();
+    }
+
+    private LocalDateTime ago(JsonNode n, String field) {
+        return daysAgo(n.get(field).asDouble());
+    }
+
+    private LocalDateTime daysAgo(double days) {
+        return now.minusSeconds(Math.round(days * 86400));
     }
 
     private void repairMissingFiles() throws Exception {
@@ -99,50 +257,16 @@ public class DemoDataSeeder implements CommandLineRunner {
             fixed++;
         }
         for (PropertyDocument d : docs.findAll()) {
-            if (!storage.exists(d.getStoredName())) { storage.writeNamed(d.getStoredName(), "%PDF-1.4 demo ownership".getBytes()); fixed++; }
+            if (!storage.exists(d.getStoredName())) { storage.writeNamed(d.getStoredName(), "%PDF-1.4 sample ownership".getBytes()); fixed++; }
         }
         for (VerificationDocument d : verificationDocs.findAll()) {
-            if (!storage.exists(d.getStoredName())) { storage.writeNamed(d.getStoredName(), "%PDF-1.4 demo document".getBytes()); fixed++; }
+            if (!storage.exists(d.getStoredName())) { storage.writeNamed(d.getStoredName(), "%PDF-1.4 sample document".getBytes()); fixed++; }
         }
-        if (fixed > 0) log.info("Recreated {} missing demo files", fixed);
-    }
-
-    private User customer(String name, String email, String phone, String city, boolean seller) {
-        return users.save(User.builder().fullName(name).email(email).password(encoder.encode("Demo@12345")).phone(phone)
-                .address("Demo address").city(city).state("Punjab").postalCode("160001").role("CUSTOMER").emailVerified(true)
-                .phoneVerified(true).buyerEnabled(true).sellerEnabled(seller).dateOfBirth(LocalDate.of(1990, 5, 17)).build());
-    }
-
-    private VerificationDocument doc(Long verificationId, String type) {
-        var s = storage.storeBytes("%PDF-1.4 demo document".getBytes(), "pdf", "application/pdf", type.toLowerCase() + ".pdf");
-        return VerificationDocument.builder().verificationId(verificationId).docType(type).storedName(s.storedName())
-                .originalName(s.originalName()).contentType(s.contentType()).sizeBytes(s.size()).build();
-    }
-
-    private Property property(User seller, String title, String type, String category, String city, String locality, long price,
-                              int area, int beds, int baths, String furnishing, boolean parking, String amenities, Color color,
-                              String status) throws Exception {
-        Property p = properties.save(Property.builder().sellerId(seller.getId()).title(title).propertyType(type).category(category)
-                .description("A well-kept " + type.toLowerCase() + " in " + locality + ", " + city + ". Close to schools, markets and public transport. "
-                        + "Sample listing for demonstration purposes.")
-                .city(city).locality(locality).address("House/Unit 12, " + locality + ", " + city).postalCode("160022")
-                .area(BigDecimal.valueOf(area)).measurementUnit("sq ft").price(BigDecimal.valueOf(price)).bedrooms(beds).bathrooms(baths)
-                .furnishingStatus(furnishing).parkingAvailable(parking).amenities(amenities).status(status)
-                .facing("East").approvedBy("Municipal Corporation").constructionType("Constructed")
-                .viewCount((int) (Math.random() * 120)).createdAt(LocalDateTime.now().minusDays((long) (Math.random() * 40))).build());
-        for (int i = 0; i < 3; i++) {
-            var s = storage.storeBytes(render(title, locality + ", " + city, color, i), "png", "image/png", "photo" + (i + 1) + ".png");
-            images.save(PropertyImage.builder().propertyId(p.getId()).storedName(s.storedName()).originalName(s.originalName())
-                    .contentType("image/png").sortOrder(i).build());
-        }
-        var d = storage.storeBytes("%PDF-1.4 demo ownership".getBytes(), "pdf", "application/pdf", "ownership.pdf");
-        docs.save(PropertyDocument.builder().propertyId(p.getId()).docType("OWNERSHIP").storedName(d.storedName())
-                .originalName(d.originalName()).contentType(d.contentType()).build());
-        return p;
+        if (fixed > 0) log.info("Recreated {} missing sample files", fixed);
     }
 
     private byte[] render(String title, String place, Color base, int variant) throws Exception {
-        int w = 1200, h = 800;
+        int w = 960, h = 640;
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -151,20 +275,20 @@ public class DemoDataSeeder implements CommandLineRunner {
         g.setPaint(new GradientPaint(0, 0, top.brighter().brighter(), 0, h, base.darker()));
         g.fillRect(0, 0, w, h);
         g.setColor(new Color(255, 255, 255, 40));
-        g.fillOval(w - 330, 60, 170, 170);
+        g.fillOval(w - 260, 50, 140, 140);
         g.setColor(new Color(0, 0, 0, 70));
-        int x = 120 + variant * 40;
-        g.fillRect(x, 380, 620, 320);
-        g.fillPolygon(new int[]{x - 30, x + 310, x + 650}, new int[]{380, 250, 380}, 3);
+        int x = 100 + variant * 40;
+        g.fillRect(x, 300, 500, 260);
+        g.fillPolygon(new int[]{x - 25, x + 250, x + 525}, new int[]{300, 195, 300}, 3);
         g.setColor(new Color(255, 226, 150, 190));
-        for (int i = 0; i < 3; i++) g.fillRect(x + 70 + i * 190, 450, 90, 110);
+        for (int i = 0; i < 3; i++) g.fillRect(x + 55 + i * 155, 360, 75, 90);
         g.setColor(new Color(0, 0, 0, 90));
-        g.fillRect(0, 700, w, 100);
+        g.fillRect(0, 560, w, 80);
         g.setColor(Color.WHITE);
-        g.setFont(new Font("SansSerif", Font.BOLD, 40));
-        g.drawString(title.length() > 40 ? title.substring(0, 40) : title, 50, 760);
-        g.setFont(new Font("SansSerif", Font.PLAIN, 24));
-        g.drawString(place + "  -  sample image", 50, 790);
+        g.setFont(new Font("SansSerif", Font.BOLD, 32));
+        g.drawString(title.length() > 44 ? title.substring(0, 44) : title, 40, 606);
+        g.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        g.drawString(place + "  -  sample image", 40, 630);
         g.dispose();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ImageIO.write(img, "png", out);

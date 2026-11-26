@@ -6,8 +6,6 @@ import com.example.properity_project.repository.UserRepository;
 import com.example.properity_project.repository.VerificationTokenRepository;
 import com.example.properity_project.util.Errors;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,13 +18,13 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class OtpService {
 
-    private static final Logger log = LoggerFactory.getLogger(OtpService.class);
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final VerificationTokenRepository tokens;
     private final UserRepository users;
     private final PasswordEncoder encoder;
     private final MailService mail;
+    private final SmsService sms;
 
     @Value("${app.dev-expose-otp:false}")
     private boolean exposeOtp;
@@ -41,12 +39,14 @@ public class OtpService {
         String code = String.format("%06d", RANDOM.nextInt(1_000_000));
         tokens.save(VerificationToken.builder().userId(user.getId()).channel(channel).purpose(purpose)
                 .codeHash(encoder.encode(code)).expiresAt(LocalDateTime.now().plusMinutes(15)).build());
-        if ("EMAIL".equals(channel)) {
-            String what = "RESET".equals(purpose) ? "reset your password" : "verify your email";
-            mail.send(user.getEmail(), "Your Haven Realty code",
-                    "Use code " + code + " to " + what + ". It expires in 15 minutes.");
-        } else {
-            log.info("[SMS stub] code for {} is {}", user.getPhone(), code);
+        String what = "RESET".equals(purpose) ? "reset your password"
+                : "EMAIL".equals(channel) ? "verify your email" : "verify your mobile number";
+        String text = code + " is your Haven Realty code to " + what + ". It expires in 15 minutes. Do not share it.";
+        if ("EMAIL".equals(channel) || "BOTH".equals(channel)) {
+            mail.send(user.getEmail(), "Your Haven Realty code", text);
+        }
+        if ("PHONE".equals(channel) || "BOTH".equals(channel)) {
+            sms.send(user.getPhone(), text);
         }
         return code;
     }

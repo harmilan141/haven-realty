@@ -6,8 +6,8 @@ foreach ($c in 'java', 'mvn', 'node', 'npm') { if (-not (Get-Command $c -ErrorAc
 
 if (-not (Test-Path "$root\frontend\node_modules")) { Push-Location "$root\frontend"; npm install; Pop-Location }
 
-$env:SEED_DEMO = 'true'; $env:DEV_EXPOSE_OTP = 'true'
-Start-Process powershell -ArgumentList '-NoExit', '-Command', "`$env:JAVA_HOME='$env:JAVA_HOME'; `$env:Path='$env:Path'; `$env:SEED_DEMO='true'; `$env:DEV_EXPOSE_OTP='true'; cd '$root\backend'; mvn spring-boot:run"
+$env:SEED_DEMO = 'true'
+Start-Process powershell -ArgumentList '-NoExit', '-Command', "`$env:JAVA_HOME='$env:JAVA_HOME'; `$env:Path='$env:Path'; `$env:SEED_DEMO='true'; cd '$root\backend'; mvn spring-boot:run"
 Start-Process powershell -ArgumentList '-NoExit', '-Command', "`$env:Path='$env:Path'; cd '$root\frontend'; npm run dev"
 
 Write-Host 'Waiting for the backend (first run downloads dependencies and can take a few minutes)...'

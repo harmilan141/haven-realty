@@ -1,5 +1,6 @@
 package com.example.properity_project.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,9 +27,9 @@ public final class AuthDtos {
 
     public record VerifyRequest(@NotBlank String channel, @NotBlank String code) {}
 
-    public record ForgotRequest(@NotBlank @Email String email) {}
+    public record ForgotRequest(@NotBlank(message = "Enter your email or mobile number") @JsonAlias("email") String login) {}
 
-    public record ResetRequest(@NotBlank @Email String email, @NotBlank String code,
+    public record ResetRequest(@NotBlank @JsonAlias("email") String login, @NotBlank String code,
                                @NotBlank @Size(min = 8, max = 72) String newPassword) {}
 
     public record ChangePasswordRequest(@NotBlank String currentPassword,

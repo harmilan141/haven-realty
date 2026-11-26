@@ -51,11 +51,12 @@ This uses a **new** database `haven_realty` (created by Flyway), so it never tou
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Database |
 | `STORAGE_DIR` | Private upload folder (default `./storage`, never web-served) |
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Real email. Without `MAIL_HOST`, emails are only logged |
-| `DEV_EXPOSE_OTP` | `true` returns one-time codes in API responses (demo only — set `false` for real use) |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` | Real SMS through Twilio. `TWILIO_FROM` is your Twilio number, e.g. `+15551234567`. `SMS_COUNTRY_CODE` defaults to `+91` |
+| `DEV_EXPOSE_OTP` | Off by default. `true` shows one-time codes on screen instead of sending them (testing only) |
 | `CORS_ORIGINS`, `PUBLIC_URL` | Allowed browser origins / site URL |
 | `SEED_DEMO` | `true` loads the demo data once |
 
-SMS is a log stub (no gateway): the mobile code is printed in the backend log and, in demo mode, shown on screen.
+Verification and password-reset codes are sent by SMS (Twilio) and email. Forgot password accepts the email or the 10-digit mobile number.
 
 ## Tests
 ```powershell

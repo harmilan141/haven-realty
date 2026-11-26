@@ -206,13 +206,13 @@ export function Forgot() {
   const nav = useNavigate();
   const toast = useToast();
   const [stage, setStage] = useState(0);
-  const [f, setF] = useState({ email: '', code: '', newPassword: '' });
+  const [f, setF] = useState({ login: '', code: '', newPassword: '' });
   const [dev, setDev] = useState('');
   const [busy, setBusy] = useState(false);
 
   const send = async (e) => {
     e.preventDefault(); setBusy(true);
-    try { const { data } = await api.post('/auth/forgot-password', { email: f.email }); setDev(data.devCode || ''); setStage(1); toast(data.message); }
+    try { const { data } = await api.post('/auth/forgot-password', { login: f.login }); setDev(data.devCode || ''); setStage(1); toast(data.message); }
     catch (err) { toast(errorMessage(err), 'error'); } finally { setBusy(false); }
   };
   const reset = async (e) => {
@@ -222,10 +222,10 @@ export function Forgot() {
   };
 
   return (
-    <Shell title="Reset your password" subtitle={stage === 0 ? 'We’ll email you a one-time code' : 'Enter the code and choose a new password'}>
+    <Shell title="Reset your password" subtitle={stage === 0 ? 'We’ll send a one-time code to your mobile and email' : 'Enter the code we sent to your mobile and email'}>
       {stage === 0 ? (
         <form onSubmit={send} className="space-y-4">
-          <Field label="Email address"><Input type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></Field>
+          <Field label="Email or mobile number"><Input required autoComplete="username" value={f.login} onChange={(e) => setF({ ...f, login: e.target.value })} /></Field>
           <Button type="submit" loading={busy} className="w-full py-3">Send code</Button>
         </form>
       ) : (

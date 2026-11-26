@@ -263,18 +263,24 @@ route('POST', '/auth/login', 'public', async ({ db, body: r }) => {
   return { token: token(u), user: userView(db, u), nextStep: null, devEmailCode: null, devPhoneCode: null };
 });
 
+const byLogin = (db, login) => {
+  let v = String(login).trim().replace(/[\s-]/g, '');
+  if (v.startsWith('+91')) v = v.slice(3);
+  return /^\d{10}$/.test(v) ? db.users.find((x) => x.phone === v) : db.users.find((x) => x.email === v.toLowerCase());
+};
+
 route('POST', '/auth/forgot-password', 'public', ({ db, body: r }) => {
-  validate(r, { email: [required(), matches(EMAIL, 'Enter a valid email')] });
-  const out = { message: 'If that email is registered, a reset code has been sent.' };
-  const u = db.users.find((x) => x.email === r.email.trim().toLowerCase());
-  if (u) out.devCode = issueCode(db, u, 'EMAIL', 'RESET');
+  validate(r, { login: [required('Enter your email or mobile number')] });
+  const out = { message: 'If that account exists, a reset code has been sent to its mobile number and email.' };
+  const u = byLogin(db, r.login);
+  if (u) out.devCode = issueCode(db, u, 'BOTH', 'RESET');
   return out;
 });
 
 route('POST', '/auth/reset-password', 'public', async ({ db, body: r }) => {
-  validate(r, { email: [required()], code: [required()], newPassword: [required(), [(v) => v.length >= 8 && v.length <= 72, 'Use 8 to 72 characters']] });
-  const u = db.users.find((x) => x.email === r.email.trim().toLowerCase()) || bad('Invalid or expired code');
-  consumeCode(db, u, 'EMAIL', 'RESET', r.code);
+  validate(r, { login: [required()], code: [required()], newPassword: [required(), [(v) => v.length >= 8 && v.length <= 72, 'Use 8 to 72 characters']] });
+  const u = byLogin(db, r.login) || bad('Invalid or expired code');
+  consumeCode(db, u, 'BOTH', 'RESET', r.code);
   strongEnough(r.newPassword);
   u.password = await hash(r.newPassword);
   audit(db, u.id, 'PASSWORD_RESET', 'User', u.id);

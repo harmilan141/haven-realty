@@ -87,9 +87,9 @@ public class AuthenticationService {
     @Transactional
     public java.util.Map<String, Object> forgotPassword(ForgotRequest r) {
         var out = new java.util.HashMap<String, Object>();
-        out.put("message", "If that email is registered, a reset code has been sent.");
-        users.findByEmail(r.email().trim().toLowerCase()).ifPresent(u -> {
-            String code = otp.issue(u, "EMAIL", "RESET");
+        out.put("message", "If that account exists, a reset code has been sent to its mobile number and email.");
+        findByLogin(r.login()).ifPresent(u -> {
+            String code = otp.issue(u, "BOTH", "RESET");
             if (otp.isExposed()) out.put("devCode", code);
         });
         return out;
@@ -97,10 +97,16 @@ public class AuthenticationService {
 
     @Transactional
     public void resetPassword(ResetRequest r) {
-        User u = users.findByEmail(r.email().trim().toLowerCase()).orElseThrow(() -> Errors.bad("Invalid or expired code"));
-        otp.consume(u, "EMAIL", "RESET", r.code());
+        User u = findByLogin(r.login()).orElseThrow(() -> Errors.bad("Invalid or expired code"));
+        otp.consume(u, "BOTH", "RESET", r.code());
         UserService.checkPasswordStrength(r.newPassword());
         u.setPassword(encoder.encode(r.newPassword()));
         audit.log(u.getId(), "PASSWORD_RESET", "User", u.getId(), null);
+    }
+
+    private java.util.Optional<User> findByLogin(String login) {
+        String v = login.trim().replaceAll("[\\s-]", "");
+        if (v.startsWith("+91")) v = v.substring(3);
+        return v.matches("\\d{10}") ? users.findFirstByPhone(v) : users.findByEmail(v.toLowerCase());
     }
 }

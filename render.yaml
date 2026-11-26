@@ -22,7 +22,13 @@ services:
       - key: SEED_DEMO
         value: "true"
       - key: DEV_EXPOSE_OTP
-        value: "true"
+        value: "false"
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM
+        sync: false
       - key: PUBLIC_URL
         sync: false
       - key: CORS_ORIGINS

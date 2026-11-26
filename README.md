@@ -33,8 +33,8 @@ npm install
 npm run dev
 ```
 
-Demo logins (only with `SEED_DEMO=true`): buyer `priya@haven.test`, seller `meera@haven.test` (both `Demo@12345`), agent `agent@haven.test` / `Agent@12345` (use the **Agent** tab on the login page).
-Demo photos are generated placeholders, not real properties.
+With `SEED_DEMO=true` an empty database is filled with sample customers, listings, enquiries and deals.
+Sample photos are generated placeholders, not real properties.
 
 ### Using MySQL
 ```powershell

@@ -38,7 +38,7 @@ export default function AgentDashboard() {
   return (
     <>
       <PageHeader title="Agent dashboard" subtitle="Everything that needs your attention." action={
-        <div className="flex gap-2">{['customers', 'properties', 'sales'].map((w) => <span key={w} className="inline-flex overflow-hidden rounded-lg border border-line bg-white">
+        <div className="flex flex-wrap gap-2">{['customers', 'properties', 'sales'].map((w) => <span key={w} className="inline-flex overflow-hidden rounded-lg border border-line bg-white">
           <button className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-navy-900 hover:bg-navy-50" onClick={() => exp(w)} aria-label={`Export ${w} to Excel`}><Download size={15} />{label(w)}</button>
           <button className="border-l border-line px-2.5 py-2 text-xs font-bold text-gold-600 hover:bg-navy-50" onClick={() => exp(w, 'pdf')} aria-label={`Export ${w} to PDF`}>PDF</button></span>)}</div>} />
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">

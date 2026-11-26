@@ -13,4 +13,4 @@ Start-Process powershell -ArgumentList '-NoExit', '-Command', "`$env:Path='$env:
 Write-Host 'Waiting for the backend (first run downloads dependencies and can take a few minutes)...'
 for ($i = 0; $i -lt 180; $i++) { try { Invoke-WebRequest http://localhost:8080/api/health -UseBasicParsing -TimeoutSec 2 | Out-Null; break } catch { Start-Sleep 2 } }
 Start-Process 'http://localhost:5173'
-Write-Host "`nOpen http://localhost:5173   |  buyer priya@haven.test  seller meera@haven.test (Demo@12345)  agent agent@haven.test / Agent@12345 (Agent tab)"
+Write-Host "`nOpen http://localhost:5173"

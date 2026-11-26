@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -25,6 +28,7 @@ public class OtpService {
     private final PasswordEncoder encoder;
     private final MailService mail;
     private final SmsService sms;
+    private final PlatformTransactionManager transactions;
 
     @Value("${app.dev-expose-otp:false}")
     private boolean exposeOtp;
@@ -64,8 +68,13 @@ public class OtpService {
             ok = sms.checkVerification(user.getPhone(), code);
         }
         if (!ok) {
-            t.setAttempts(t.getAttempts() + 1);
-            tokens.save(t);
+            // saved in its own transaction: the error below rolls back the caller's transaction
+            TransactionTemplate separate = new TransactionTemplate(transactions);
+            separate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            separate.executeWithoutResult(s -> tokens.findById(t.getId()).ifPresent(x -> {
+                x.setAttempts(x.getAttempts() + 1);
+                tokens.save(x);
+            }));
             throw Errors.bad("Invalid or expired code");
         }
         t.setUsedAt(LocalDateTime.now());

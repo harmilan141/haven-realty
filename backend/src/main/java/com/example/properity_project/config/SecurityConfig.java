@@ -25,7 +25,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-// URL rules. Services also check ownership, so this isn't the only check.
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -44,7 +43,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider provider) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // stateless bearer-token API, no cookies
+            .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .headers(h -> h.frameOptions(f -> f.deny()))
             .authorizeHttpRequests(auth -> auth
@@ -54,7 +53,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/agent/**").hasRole("AGENT")
                 .requestMatchers("/api/seller/**", "/api/me/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()) // static frontend files
+                .anyRequest().permitAll())
             .exceptionHandling(e -> e.authenticationEntryPoint((req, res, ex) -> {
                 res.setStatus(401);
                 res.setContentType("application/json");

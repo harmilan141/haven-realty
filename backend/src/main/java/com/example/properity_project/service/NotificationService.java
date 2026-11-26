@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
-/** In-app notifications, optionally mirrored to email for the important events. */
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -27,7 +26,6 @@ public class NotificationService {
         }
     }
 
-    /** Tell the single agent about something (new enquiry, new seller application, ...). */
     public void notifyAgent(String title, String body, String link) {
         users.findFirstByRole("AGENT").ifPresent(a -> notify(a.getId(), title, body, link, false));
     }

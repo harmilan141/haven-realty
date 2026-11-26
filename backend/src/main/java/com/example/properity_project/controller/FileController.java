@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Private documents: identity proofs and ownership papers. Only the owner and the agent can fetch them. */
 @RestController
 @RequestMapping("/api/files")
 @RequiredArgsConstructor

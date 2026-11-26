@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-// A customer can be both buyer and seller (flags) on one account. Only the agent has role AGENT.
 @Entity
 @Table(name = "users")
 @Getter
@@ -34,7 +33,7 @@ public class User implements UserDetails {
     private String state;
     private String address;
     private String postalCode;
-    private String role; // CUSTOMER or AGENT
+    private String role;
 
     @Builder.Default
     private boolean accountEnabled = true;

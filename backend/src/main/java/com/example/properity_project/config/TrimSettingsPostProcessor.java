@@ -9,7 +9,6 @@ import org.springframework.core.env.MapPropertySource;
 import java.util.HashMap;
 import java.util.Map;
 
-// Trims stray spaces/tabs from DB and secret settings pasted into hosting dashboards.
 public class TrimSettingsPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final String[] KEYS = {"spring.datasource.url", "spring.datasource.username",

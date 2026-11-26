@@ -9,7 +9,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-/** Sends real email when MAIL_HOST is configured; otherwise just logs so local demos still work. */
 @Service
 public class MailService {
 

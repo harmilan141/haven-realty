@@ -13,10 +13,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Sale transactions (the old desktop "Deals" screen) and rental agreements. Agent-only.
- * Rule carried over from the desktop app: a COMPLETED deal marks the property SOLD.
- */
 @Service
 @RequiredArgsConstructor
 public class RecordsService {
@@ -33,8 +29,6 @@ public class RecordsService {
     private final EnquiryService enquiryService;
     private final NotificationService notifications;
     private final AuditService audit;
-
-    // sales
 
     public List<SaleView> sales() {
         return sales.findAll(Sort.by("id").descending()).stream().map(this::view).toList();
@@ -112,8 +106,6 @@ public class RecordsService {
         }
     }
 
-    // rentals
-
     public List<RentalView> rentals() {
         return rentals.findAll(Sort.by("id").descending()).stream().map(this::view).toList();
     }
@@ -159,8 +151,6 @@ public class RecordsService {
         audit.log(agent.getId(), "RENTAL_UPDATED", "RentalAgreement", id, status);
         return view(r);
     }
-
-    // mapping
 
     private SaleView view(SaleTransaction t) {
         Property p = properties.findById(t.getPropertyId()).orElseThrow();

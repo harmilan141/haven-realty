@@ -2,10 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Send } from 'lucide-react';
 import { Button, Textarea, fmtDateTime } from './ui.jsx';
 
-/**
- * A message thread. `mine(m)` says which side is "me", `from` classifies a message for bubble styling.
- * System messages (status changes) are shown as centred notes.
- */
 export default function Chat({ messages, isMine, onSend, placeholder = 'Write a message…', internalToggle, disabled }) {
   const [text, setText] = useState('');
   const [internal, setInternal] = useState(false);

@@ -30,7 +30,6 @@ function PasswordInput({ value, onChange, error, autoComplete, id }) {
   );
 }
 
-// login
 export function Login() {
   const { login, user } = useAuth();
   const nav = useNavigate();
@@ -77,7 +76,6 @@ export function Login() {
   );
 }
 
-// signup
 const STEPS = ['Your details', 'Account', 'Purpose', 'Verify'];
 const hasUpper = /[A-Za-z]/, hasNum = /\d/;
 
@@ -204,7 +202,6 @@ export function Signup() {
   );
 }
 
-// forgot password
 export function Forgot() {
   const nav = useNavigate();
   const toast = useToast();

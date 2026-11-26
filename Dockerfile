@@ -1,4 +1,3 @@
-# One image: builds the React app, embeds it in the Spring Boot jar, runs it on JRE 21.
 FROM node:22-alpine AS web
 WORKDIR /web
 COPY frontend/package*.json ./

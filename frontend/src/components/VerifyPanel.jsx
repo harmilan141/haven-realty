@@ -4,7 +4,6 @@ import api, { errorMessage } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { Button, Field, Input, useToast } from './ui.jsx';
 
-/** Email + mobile one-time-code verification. In demo mode the server returns the codes so no SMS gateway is needed. */
 export default function VerifyPanel({ devCodes = {}, onDone }) {
   const { user, refresh } = useAuth();
   const toast = useToast();

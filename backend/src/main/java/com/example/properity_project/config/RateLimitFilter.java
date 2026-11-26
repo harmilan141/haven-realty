@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Simple in-memory limiter for the unauthenticated auth endpoints (login, register, password reset). */
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private final int maxRequests;

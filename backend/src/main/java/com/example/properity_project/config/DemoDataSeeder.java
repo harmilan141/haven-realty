@@ -20,10 +20,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * Sample data for demos (SEED_DEMO=true). Photos are generated placeholders, not real listings.
- * Demo passwords are all "Demo@12345"; the agent is agent@haven.test / Agent@12345 unless AGENT_EMAIL is set.
- */
 @Component
 @Order(2)
 @ConditionalOnProperty(name = "app.seed-demo", havingValue = "true")
@@ -91,10 +87,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         log.info("Demo data created. Sign in as priya@haven.test / Demo@12345 (buyer), meera@haven.test (seller), agent@haven.test / Agent@12345");
     }
 
-    /**
-     * Demo rows live in the database but their files live on disk. On a fresh server (or a new disk) the files are
-     * missing, so recreate them with the same stored names.
-     */
     private void repairMissingFiles() throws Exception {
         int fixed = 0;
         Color[] palette = {new Color(0x1f3a5f), new Color(0x2d5a7b), new Color(0x3b6e5b), new Color(0x6b5b3b), new Color(0x4a3f6b), new Color(0x7b3f3f)};
@@ -149,7 +141,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         return p;
     }
 
-    /** A simple generated placeholder photo (architectural silhouette on a gradient). */
     private byte[] render(String title, String place, Color base, int variant) throws Exception {
         int w = 1200, h = 800;
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

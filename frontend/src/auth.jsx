@@ -5,7 +5,6 @@ import api, { setUnauthorizedHandler, tokenStore } from './api.js';
 const AuthCtx = createContext(null);
 export const useAuth = () => useContext(AuthCtx);
 
-// current user (loaded from /account/me)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);

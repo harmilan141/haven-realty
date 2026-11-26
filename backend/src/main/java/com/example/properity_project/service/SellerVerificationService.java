@@ -16,9 +16,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Seller verification. Only the agent approving sets users.seller_enabled (uploading docs isn't enough).
- */
 @Service
 @RequiredArgsConstructor
 public class SellerVerificationService {
@@ -82,8 +79,6 @@ public class SellerVerificationService {
         return verifications.findFirstByUserIdOrderByIdDesc(user.getId()).map(this::view).orElse(null);
     }
 
-    // agent side
-
     public Page<AgentVerification> list(List<String> statuses, int page, int size) {
         List<String> wanted = statuses == null || statuses.isEmpty()
                 ? List.of("PENDING", "UNDER_REVIEW", "RESUBMISSION_REQUIRED", "REJECTED", "VERIFIED") : statuses;
@@ -134,7 +129,6 @@ public class SellerVerificationService {
         return agentView(v);
     }
 
-    /** Only the applicant or the agent may fetch a verification document. */
     public VerificationDocument documentFor(User requester, Long docId) {
         VerificationDocument d = docs.findById(docId).orElseThrow(() -> Errors.notFound("Document"));
         SellerVerification v = find(d.getVerificationId());
@@ -142,8 +136,6 @@ public class SellerVerificationService {
         audit.log(requester.getId(), "DOCUMENT_VIEWED", "VerificationDocument", docId, null);
         return d;
     }
-
-    // helpers
 
     private SellerVerification find(Long id) {
         return verifications.findById(id).orElseThrow(() -> Errors.notFound("Application"));

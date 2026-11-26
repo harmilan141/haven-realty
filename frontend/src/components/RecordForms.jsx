@@ -14,7 +14,6 @@ export async function downloadExport(what, ext = 'xlsx') {
   setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
 }
 
-/** Record or edit a sale. Creating from an enquiry fills in the buyer, seller and property automatically. */
 export function SaleModal({ open, onClose, initial, onSaved }) {
   const toast = useToast();
   const editing = !!initial?.id;

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/** Endpoints shared by customers and the agent. */
 @RestController
 @RequestMapping("/api/account")
 @RequiredArgsConstructor

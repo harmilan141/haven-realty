@@ -28,7 +28,6 @@ function AgentLoginForm() {
   );
 }
 
-/** Tells visitors this is a browser-only demo and gives them the sample logins. */
 export default function DemoBanner() {
   const [open, setOpen] = useState(false);
   const [changing, setChanging] = useState(false);

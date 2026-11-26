@@ -31,14 +31,12 @@ public final class PropertyDtos {
             String facing,
             String approvedBy) {}
 
-    /** Listing card (no owner info). */
     public record PropertyCard(Long id, String title, String propertyType, String category, String city,
                                String locality, BigDecimal price, BigDecimal area, String measurementUnit,
                                Integer bedrooms, Integer bathrooms, String furnishingStatus,
                                String coverImageUrl, boolean verified, boolean wishlisted,
                                LocalDateTime listedAt) {}
 
-    /** Listing detail. Seller info is left out, enquiries go via the agent. */
     public record PropertyDetail(PropertyCard card, String description, String postalCode, boolean parkingAvailable,
                                  List<String> amenities, List<String> imageUrls, String constructionType,
                                  String facing, String approvedBy, String contactedThrough) {}

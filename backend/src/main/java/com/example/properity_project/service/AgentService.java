@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/** Agent-only: customer administration, dashboard analytics, audit trail and spreadsheet exports. */
 @Service
 @RequiredArgsConstructor
 public class AgentService {
@@ -110,8 +109,6 @@ public class AgentService {
         });
     }
 
-    // Excel / PDF export (kept from the desktop app)
-
     private record Table(String title, List<String> headers, List<List<String>> rows) {}
 
     private static String str(Object v) {
@@ -169,7 +166,6 @@ public class AgentService {
         }
     }
 
-    /** Landscape A4 table, paginated. Uses a standard PDF font, so non-Latin characters print as '?'. */
     public byte[] exportPdf(String what) {
         Table t = table(what);
         PDRectangle page = new PDRectangle(PDRectangle.A4.getHeight(), PDRectangle.A4.getWidth());

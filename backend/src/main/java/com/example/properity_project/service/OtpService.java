@@ -16,10 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
-/**
- * Six-digit one-time codes for email verification, phone verification and password reset.
- * Codes are stored hashed. Email goes through MailService; SMS is a log stub (no gateway).
- */
 @Service
 @RequiredArgsConstructor
 public class OtpService {
@@ -39,7 +35,6 @@ public class OtpService {
         return exposeOtp;
     }
 
-    /** Creates and delivers a code. Returns the plain code only so demo mode can show it. */
     @Transactional
     public String issue(User user, String channel, String purpose) {
         tokens.invalidateOpen(user.getId(), channel, purpose, LocalDateTime.now());

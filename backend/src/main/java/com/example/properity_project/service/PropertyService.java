@@ -21,11 +21,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Listing lifecycle: DRAFT -> SUBMITTED -> UNDER_REVIEW -> PUBLISHED (approved) | REJECTED,
- * and PUBLISHED <-> INACTIVE / SUSPENDED, PUBLISHED -> SOLD.
- * Customers only see PUBLISHED listings.
- */
 @Service
 @RequiredArgsConstructor
 public class PropertyService {
@@ -49,8 +44,6 @@ public class PropertyService {
     public record SearchCriteria(String q, String city, String locality, String type, Integer bhk, String category,
                                  BigDecimal minPrice, BigDecimal maxPrice, BigDecimal minArea, BigDecimal maxArea,
                                  String sort) {}
-
-    // public / customer
 
     public Page<PropertyCard> search(SearchCriteria c, int page, int size, User viewer) {
         Specification<Property> spec = (root, query, cb) -> {
@@ -112,7 +105,6 @@ public class PropertyService {
                 .map(p -> card(p, Set.of())).toList();
     }
 
-    /** Returns the stored image file after checking the viewer may see it. */
     public record ImageFile(Resource resource, String contentType) {}
 
     public ImageFile imageFile(Long propertyId, Long imageId, User viewer) {
@@ -145,8 +137,6 @@ public class PropertyService {
                 .limit(6).map(p -> card(p, saved)).toList();
     }
 
-    // wishlist
-
     @Transactional
     public void addToWishlist(User user, Long propertyId) {
         Property p = properties.findById(propertyId).filter(x -> PUBLISHED.equals(x.getStatus()))
@@ -167,8 +157,6 @@ public class PropertyService {
                 .map(w -> properties.findById(w.getPropertyId()).orElse(null))
                 .filter(p -> p != null && PUBLISHED.equals(p.getStatus())).map(p -> card(p, saved)).toList();
     }
-
-    // seller
 
     private void requireSeller(User u) {
         if (!u.isSellerEnabled()) throw Errors.forbidden("Your seller verification must be approved before you can list properties");
@@ -200,7 +188,7 @@ public class PropertyService {
         }
         apply(p, in);
         if (p.getStatus().equals(PUBLISHED)) {
-            p.setStatus("SUBMITTED"); // edited live listings are re-checked by the agent
+            p.setStatus("SUBMITTED");
             approvals.save(approval(p, "RESUBMITTED", "Edited after publishing", seller.getId()));
             notifications.notifyAgent("Listing edited", p.getTitle() + " needs another review", "/agent/properties");
         }
@@ -291,8 +279,6 @@ public class PropertyService {
         return m;
     }
 
-    // agent
-
     public Page<AgentProperty> adminList(List<String> statuses, String q, int page, int size) {
         List<String> wanted = statuses == null || statuses.isEmpty()
                 ? List.of("DRAFT", "SUBMITTED", "UNDER_REVIEW", "PUBLISHED", "REJECTED", "SUSPENDED", "INACTIVE", "SOLD") : statuses;
@@ -371,7 +357,6 @@ public class PropertyService {
         return agentView(p);
     }
 
-    /** Also used by sale/rental management when a deal completes (the desktop app's "Completed => Sold" rule). */
     @Transactional
     public void markStatus(Property p, String status, Long actorId, String reason) {
         p.setStatus(status);
@@ -390,8 +375,6 @@ public class PropertyService {
         audit.log(requester.getId(), "DOCUMENT_VIEWED", "PropertyDocument", docId, null);
         return d;
     }
-
-    // mapping helpers
 
     private void apply(Property p, PropertyInput in) {
         String type = in.propertyType().trim();
@@ -466,7 +449,6 @@ public class PropertyService {
         return new AgentProperty(sellerView(p), new SellerSummary(s.getId(), s.getFullName(), s.getEmail(), s.getPhone(), s.getCity()), history);
     }
 
-    /** Light lookup used by other services. */
     public Property require(Long id) {
         return properties.findById(id).orElseThrow(() -> Errors.notFound("Property"));
     }

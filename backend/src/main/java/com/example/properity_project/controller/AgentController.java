@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/** The one agent's console. /api/agent/** is restricted to ROLE_AGENT in SecurityConfig. */
 @RestController
 @RequestMapping("/api/agent")
 @RequiredArgsConstructor
@@ -35,8 +34,6 @@ public class AgentController {
 
     public record Reason(String reason) {}
     public record Msg(@NotBlank String body, Long propertyId) {}
-
-    // dashboard, audit, export
 
     @GetMapping("/dashboard")
     public Map<String, Object> dashboard() {
@@ -62,8 +59,6 @@ public class AgentController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + what + ".pdf\"")
                 .body(agent.exportPdf(what));
     }
-
-    // customers
 
     @GetMapping("/customers")
     public Page<AgentService.AgentCustomer> customers(@RequestParam(required = false) String q,
@@ -98,8 +93,6 @@ public class AgentController {
         return channels.agentSend(a, id, m.body(), m.propertyId());
     }
 
-    // seller verification
-
     @GetMapping("/verifications")
     public Page<AgentVerification> verifications(@RequestParam(required = false) List<String> status,
                                                  @RequestParam(defaultValue = "0") int page,
@@ -121,8 +114,6 @@ public class AgentController {
     public AgentVerification decide(@AuthenticationPrincipal User a, @PathVariable Long id, @Valid @RequestBody DecisionRequest req) {
         return verifications.decide(a, id, req);
     }
-
-    // properties
 
     @GetMapping("/properties")
     public Page<AgentProperty> properties(@RequestParam(required = false) List<String> status,
@@ -156,8 +147,6 @@ public class AgentController {
     public AgentProperty propertyStatus(@AuthenticationPrincipal User a, @PathVariable Long id, @Valid @RequestBody StatusChange c) {
         return properties.setStatus(a, id, c);
     }
-
-    // enquiries (buyer <-> agent)
 
     @GetMapping("/enquiries")
     public Page<AgentEnquiry> enquiries(@RequestParam(required = false) List<String> status,
@@ -205,8 +194,6 @@ public class AgentController {
     public AgentEnquiryDetail offerStatus(@AuthenticationPrincipal User a, @PathVariable Long id, @Valid @RequestBody OfferStatus req) {
         return enquiries.offerStatus(a, id, req);
     }
-
-    // sales and rentals
 
     @GetMapping("/sales")
     public List<SaleView> sales() {

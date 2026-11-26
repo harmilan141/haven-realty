@@ -1,4 +1,3 @@
-# Builds ONE deployable jar that contains the API and the web app:  backend\target\haven-realty.jar
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $tools = "$env:USERPROFILE\tools"

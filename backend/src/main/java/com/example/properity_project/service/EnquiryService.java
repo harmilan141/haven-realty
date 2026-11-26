@@ -16,13 +16,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Enquiry lifecycle and the BUYER <-> AGENT channel.
- * NEW -> UNDER_REVIEW -> CONTACTED -> DETAILS_SHARED -> SITE_VISIT_SCHEDULED -> NEGOTIATION
- *     -> DEAL_IN_PROGRESS -> CLOSED, plus REJECTED / ON_HOLD / CANCELLED.
- *
- * Customers only get their own enquiries and non-internal messages.
- */
 @Service
 @RequiredArgsConstructor
 public class EnquiryService {
@@ -42,8 +35,6 @@ public class EnquiryService {
     private final PropertyService propertyService;
     private final NotificationService notifications;
     private final AuditService audit;
-
-    // customer side
 
     @Transactional
     public CustomerEnquiry create(User customer, CreateEnquiry req) {
@@ -98,12 +89,9 @@ public class EnquiryService {
     }
 
     private Enquiry ownedBy(User customer, Long id) {
-        // 404 instead of 403 so other ids can't be guessed
         return enquiries.findById(id).filter(e -> e.getCustomerId().equals(customer.getId()))
                 .orElseThrow(() -> Errors.notFound("Enquiry"));
     }
-
-    // agent side
 
     public Page<AgentEnquiry> agentList(List<String> statuses, int page, int size) {
         List<String> wanted = statuses == null || statuses.isEmpty() ? List.copyOf(STATUSES) : statuses;
@@ -210,14 +198,11 @@ public class EnquiryService {
         return agentOne(o.getEnquiryId());
     }
 
-    /** Used by sale / rental management to move a deal forward. */
     @Transactional
     public void moveTo(Long enquiryId, String status, String reason, Long actorId) {
         if (enquiryId == null) return;
         enquiries.findById(enquiryId).ifPresent(e -> setStatus(e, status, reason, actorId, true));
     }
-
-    // helpers
 
     private Enquiry find(Long id) {
         return enquiries.findById(id).orElseThrow(() -> Errors.notFound("Enquiry"));

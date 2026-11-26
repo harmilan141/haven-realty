@@ -1,4 +1,3 @@
-// Small shared pieces of the in-browser API: errors, validation, dates and paging.
 export class ApiError extends Error {
   constructor(status, message, fields) { super(message); this.status = status; this.fields = fields; }
 }
@@ -11,11 +10,9 @@ export const notFound = (what) => fail(404, `${what} not found`);
 export const has = (s) => s != null && String(s).trim() !== '';
 
 const pad = (n) => String(n).padStart(2, '0');
-/** Local date-time without a zone, the same shape the Java API returns. */
 export const stamp = (d = new Date()) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 
-/** rules: { field: [[testReturningTrueWhenValid, message], ...] } */
 export function validate(body, rules) {
   const fields = {};
   for (const [name, checks] of Object.entries(rules)) {

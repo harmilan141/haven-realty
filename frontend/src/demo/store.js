@@ -1,10 +1,9 @@
-// The demo "database": one object kept in the visitor's own browser (IndexedDB), plus the sample data.
 import { stamp } from './http.js';
 import { sampleImage, samplePdf } from './files.js';
 
 const DB_NAME = 'haven-demo';
-const VERSION = 1; // bump to replace every visitor's stored demo data
-let memory = null; // used when the browser blocks IndexedDB
+const VERSION = 1;
+let memory = null;
 
 const request = (r) => new Promise((ok, no) => { r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
 async function idb(mode, work) {
@@ -38,7 +37,7 @@ export async function save(data) {
 
 export async function reset() {
   memory = null;
-  try { await idb('readwrite', (s) => s.delete('db')); } catch { /* nothing stored */ }
+  try { await idb('readwrite', (s) => s.delete('db')); } catch {}
 }
 
 export async function hash(password, salt = crypto.randomUUID()) {
@@ -47,7 +46,6 @@ export async function hash(password, salt = crypto.randomUUID()) {
 }
 export const passwordMatches = async (password, stored) => (await hash(password, stored.split(':')[0])) === stored;
 
-// rows with the same defaults as the Java entities
 const DEFAULTS = {
   users: { accountEnabled: true, emailVerified: false, phoneVerified: false, buyerEnabled: true, sellerEnabled: false, dateOfBirth: null, city: null, state: null, address: null, postalCode: null, preferences: null },
   tokens: { usedAt: null, attempts: 0 },
@@ -79,7 +77,6 @@ export function storeFile(db, { name, type, blob }) {
   return { storedName: key, originalName: name, contentType: type, size: blob.size };
 }
 
-// sample data
 async function seed() {
   const db = { version: VERSION, seq: {}, files: {} };
   for (const t of Object.keys(DEFAULTS)) db[t] = [];

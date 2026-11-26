@@ -1,4 +1,3 @@
-// File helpers for the browser-only demo: uploads, sample images, and Excel / PDF generation.
 import { fail } from './http.js';
 
 const TYPES = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', pdf: 'application/pdf' };
@@ -9,7 +8,6 @@ const magicOk = (type, h) =>
     : type === 'image/png' ? h[0] === 0x89 && h[1] === 0x50 && h[2] === 0x4e && h[3] === 0x47
       : h[0] === 0x25 && h[1] === 0x50 && h[2] === 0x44 && h[3] === 0x46;
 
-/** Shrinks photos so a visitor's browser storage does not fill up. */
 async function shrink(file) {
   const bmp = await createImageBitmap(file);
   const scale = Math.min(1, 1280 / Math.max(bmp.width, bmp.height));
@@ -23,7 +21,6 @@ async function shrink(file) {
   return new Promise((ok) => canvas.toBlob(ok, 'image/jpeg', 0.85));
 }
 
-/** Same checks as the server: extension, size and file signature. */
 export async function readUpload(file, imageOnly) {
   if (!file || !file.size) fail(400, 'Please choose a file to upload');
   const name = String(file.name || 'file').replace(/\\/g, '/').split('/').pop().replace(/[^A-Za-z0-9._ -]/g, '_') || 'file';
@@ -44,7 +41,6 @@ export async function readUpload(file, imageOnly) {
 const xml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
 const shade = (hex, f) => '#' + [1, 3, 5].map((i) => Math.max(0, Math.min(255, Math.round(parseInt(hex.slice(i, i + 2), 16) * f))).toString(16).padStart(2, '0')).join('');
 
-/** A generated placeholder photo (architectural silhouette on a gradient). */
 export function sampleImage(title, place, colour, variant) {
   const x = 120 + variant * 40;
   const top = shade(colour, variant === 1 ? 2.3 : 1.8);
@@ -61,7 +57,6 @@ export function sampleImage(title, place, colour, variant) {
 
 const ascii = (v) => String(v).replace(/[^\x20-\x7E]/g, '?');
 
-/** Minimal PDF writer: each page is a list of { x, y, size, bold, text }. Landscape A4. */
 export function makePdf(pages) {
   const W = 842, H = 595;
   const esc = (s) => ascii(s).replace(/[\\()]/g, '\\$&');
@@ -110,7 +105,6 @@ export function tablePdf(title, headers, rows) {
 const CRC = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
 const crc32 = (b) => { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
 
-/** Uncompressed ZIP, which is all an .xlsx file needs. */
 function zip(files) {
   const enc = new TextEncoder();
   const parts = [], central = [];

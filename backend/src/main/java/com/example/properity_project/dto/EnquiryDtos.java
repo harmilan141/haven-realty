@@ -31,7 +31,6 @@ public final class EnquiryDtos {
 
     public record OfferStatus(@NotBlank String status) {}
 
-    /** "ME", "AGENT" or "SYSTEM" - hides the other side's user id. */
     public record MessageView(Long id, String from, String body, boolean internal, LocalDateTime at) {}
 
     public record VisitView(Long id, LocalDateTime scheduledAt, String status, String notes) {}

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** Public listings - published only, without seller details. */
 @RestController
 @RequestMapping("/api/properties")
 @RequiredArgsConstructor

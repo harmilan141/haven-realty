@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// Same-origin in dev (Vite proxy) and in production behind a reverse proxy; override with VITE_API_URL.
 const api = axios.create({ baseURL: `${import.meta.env.VITE_API_URL || ''}/api` });
 
-// The static (GitHub Pages) build has no server, so requests are answered inside the browser.
 export const DEMO = import.meta.env.VITE_DEMO === 'true';
 if (DEMO) api.defaults.adapter = async (config) => (await import('./demo/server.js')).adapter(config);
 
@@ -14,9 +12,9 @@ export const tokenStore = {
     try {
       localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY);
       (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, t);
-    } catch { /* storage unavailable */ }
+    } catch {}
   },
-  clear: () => { try { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); } catch { /* noop */ } },
+  clear: () => { try { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); } catch {} },
 };
 
 api.interceptors.request.use((config) => {
@@ -37,7 +35,6 @@ export const errorMessage = (err) =>
   err?.response?.data?.message || (err?.response ? 'Something went wrong.' : 'Cannot reach the server. Is the backend running?');
 export const fieldErrors = (err) => err?.response?.data?.fields || {};
 
-// Private files need the bearer token, so they are fetched as blobs instead of being linked directly.
 export async function openPrivateFile(url) {
   const res = await api.get(url.replace(/^\/api/, ''), { responseType: 'blob' });
   const objectUrl = URL.createObjectURL(res.data);

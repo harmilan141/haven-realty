@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { CheckCircle2, ChevronLeft, ChevronRight, Inbox, Loader2, TriangleAlert, X, ImageOff } from 'lucide-react';
 import api, { DEMO } from '../api.js';
 
-// formatting
 export const inr = (v, category) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(v || 0)) +
   (category === 'RENT' ? ' / mo' : '');
@@ -17,7 +16,6 @@ export const fmtDateTime = (d) =>
   d ? new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
 export const label = (s) => (s ? s.toString().replace(/_/g, ' ').toLowerCase().replace(/^\w/, (c) => c.toUpperCase()) : '');
 
-// toasts
 const ToastCtx = createContext(() => {});
 export const useToast = () => useContext(ToastCtx);
 
@@ -43,7 +41,6 @@ export function ToastProvider({ children }) {
   );
 }
 
-// basic controls
 const btnBase = 'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50';
 const variants = {
   primary: 'bg-navy-900 text-white hover:bg-navy-800',
@@ -79,7 +76,6 @@ export const Select = ({ error, className = '', children, ...p }) => (
 );
 export const Textarea = ({ error, className = '', ...p }) => <textarea className={`${inputCls} ${error ? 'border-red-400' : 'border-line'} ${className}`} rows={4} {...p} />;
 
-// layout bits
 export const Card = ({ className = '', children }) => <div className={`rounded-xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] ${className}`}>{children}</div>;
 
 export function PageHeader({ title, subtitle, action }) {
@@ -181,9 +177,7 @@ export function Tabs({ tabs, value, onChange }) {
   );
 }
 
-// images
 const blobCache = new Map();
-/** Fetches through axios so the bearer token is sent (needed for not-yet-published listings). */
 export function PrivateImg({ src, alt, className = '' }) {
   const [url, setUrl] = useState(blobCache.get(src));
   const [failed, setFailed] = useState(false);
@@ -205,7 +199,6 @@ export function Placeholder({ className = '' }) {
 }
 
 export function PublicImg(props) {
-  // without a server there is no image URL to link to, so images are loaded through the API client
   return DEMO ? <PrivateImg {...props} /> : <LinkedImg {...props} />;
 }
 
@@ -215,7 +208,6 @@ function LinkedImg({ src, alt, className = '' }) {
   return <img src={`${import.meta.env.VITE_API_URL || ''}${src}`} alt={alt} loading="lazy" onError={() => setBad(true)} className={className} />;
 }
 
-// data loading
 export function useLoad(fn, deps = []) {
   const [state, setState] = useState({ loading: true, data: null, error: null });
   const fnRef = useRef(fn);

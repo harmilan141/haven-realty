@@ -9,7 +9,7 @@ const TABS = [['SUBMITTED,UNDER_REVIEW', 'To review'], ['PUBLISHED', 'Published'
 function Detail({ id }) {
   const toast = useToast();
   const { loading, data, error, reload, setData } = useLoad(() => api.get(`/agent/properties/${id}`), [id]);
-  const [ask, setAsk] = useState(null); // { action, title, needsReason }
+  const [ask, setAsk] = useState(null);
   const [reason, setReason] = useState('');
   const [edit, setEdit] = useState(null);
   if (loading) return <Spinner />;

@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 
 const KEY = 'haven_compare';
 const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
-const write = (ids) => { try { localStorage.setItem(KEY, JSON.stringify(ids)); } catch { /* storage unavailable */ } window.dispatchEvent(new Event('compare-change')); };
+const write = (ids) => { try { localStorage.setItem(KEY, JSON.stringify(ids)); } catch {} window.dispatchEvent(new Event('compare-change')); };
 
-/** Up to 4 property ids to compare, remembered in this browser only. */
 export function useCompare() {
   const [ids, setIds] = useState(read);
   useEffect(() => {

@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 public final class RecordDtos {
     private RecordDtos() {}
 
-    /** Either enquiryId (buyer and property are taken from it) or propertyId + buyerId. */
     public record SaleInput(Long enquiryId, Long propertyId, Long buyerId,
                             @NotNull @DecimalMin("1") BigDecimal finalAmount,
                             @DecimalMin("0") BigDecimal downPayment,

@@ -1,5 +1,3 @@
-﻿# Starts the whole project (backend + frontend) with demo data and opens the browser.
-# Needs JDK 17+, Maven and Node 20+. If java/mvn are not on PATH it falls back to %USERPROFILE%\tools.
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $tools = "$env:USERPROFILE\tools"
 if (-not (Get-Command java -ErrorAction SilentlyContinue) -and (Test-Path "$tools\jdk")) { $env:JAVA_HOME = "$tools\jdk"; $env:Path = "$tools\jdk\bin;$env:Path" }

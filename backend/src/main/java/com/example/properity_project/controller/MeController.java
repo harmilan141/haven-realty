@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Everything a signed-in customer does as a buyer (and the way to become a seller). */
 @RestController
 @RequestMapping("/api/me")
 @RequiredArgsConstructor
@@ -28,8 +27,6 @@ public class MeController {
     private final PropertyService properties;
     private final EnquiryService enquiries;
     private final NotificationService notifications;
-
-    // profile & verification
 
     @PutMapping
     public UserView update(@AuthenticationPrincipal User user, @Valid @RequestBody ProfileUpdate req) {
@@ -47,8 +44,6 @@ public class MeController {
         return auth.resend(user, body.getOrDefault("channel", "EMAIL"));
     }
 
-    // seller application (same account, separate verification status)
-
     @GetMapping("/seller-application")
     public MyVerification application(@AuthenticationPrincipal User user) {
         return verification.mine(user);
@@ -62,8 +57,6 @@ public class MeController {
                                 @RequestParam(value = "photo", required = false) MultipartFile photo) {
         return verification.submit(user, consent, identity, address, photo);
     }
-
-    // wishlist / recently viewed / dashboard
 
     @GetMapping("/wishlist")
     public List<PropertyCard> wishlist(@AuthenticationPrincipal User user) {
@@ -99,8 +92,6 @@ public class MeController {
         m.put("unreadNotifications", notifications.unread(user));
         return m;
     }
-
-    // enquiries (buyer <-> agent)
 
     @PostMapping("/enquiries")
     public CustomerEnquiry createEnquiry(@AuthenticationPrincipal User user, @Valid @RequestBody CreateEnquiry req) {

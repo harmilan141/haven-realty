@@ -46,7 +46,6 @@ public final class AuthDtos {
                            boolean phoneVerified, String sellerStatus, String city, String state,
                            String address, String postalCode, LocalDate dateOfBirth, String preferences) {}
 
-    /** devEmailCode/devPhoneCode are only filled when app.dev-expose-otp=true (demo mode). */
     public record AuthResponse(String token, UserView user, String nextStep,
                                String devEmailCode, String devPhoneCode) {}
 }

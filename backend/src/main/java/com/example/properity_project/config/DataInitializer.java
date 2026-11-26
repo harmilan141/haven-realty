@@ -11,10 +11,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-/**
- * Creates the agent account from AGENT_EMAIL / AGENT_PASSWORD (agents can't sign up).
- * Skipped if an agent already exists.
- */
 @Component
 @Order(1)
 @RequiredArgsConstructor

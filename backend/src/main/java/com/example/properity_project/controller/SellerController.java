@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
-/** Seller portal. Every call is scoped to the signed-in seller's own listings. */
 @RestController
 @RequestMapping("/api/seller")
 @RequiredArgsConstructor
@@ -82,8 +81,6 @@ public class SellerController {
     public SellerProperty activate(@AuthenticationPrincipal User u, @PathVariable Long id) {
         return properties.setActive(u, id, true);
     }
-
-    // seller <-> agent chat
 
     @GetMapping("/messages")
     public List<Map<String, Object>> messages(@AuthenticationPrincipal User u) {

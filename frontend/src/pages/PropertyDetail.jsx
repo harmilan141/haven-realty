@@ -15,7 +15,7 @@ export default function PropertyDetail() {
   const compare = useCompare();
   const { loading, data, error, reload, setData } = useLoad(() => api.get(`/properties/${id}`), [id]);
   const [active, setActive] = useState(0);
-  const [modal, setModal] = useState(null); // 'enquire' | 'visit'
+  const [modal, setModal] = useState(null);
   const [message, setMessage] = useState('');
   const [when, setWhen] = useState('');
   const [errs, setErrs] = useState({});

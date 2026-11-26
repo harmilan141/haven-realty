@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-// Seller <-> agent chat, keyed by seller id. Kept separate from buyer_agent_messages.
 @Service
 @RequiredArgsConstructor
 public class ChannelService {

@@ -51,7 +51,9 @@ This uses a **new** database `haven_realty` (created by Flyway), so it never tou
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Database |
 | `STORAGE_DIR` | Private upload folder (default `./storage`, never web-served) |
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Real email. Without `MAIL_HOST`, emails are only logged |
-| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` | Real SMS through Twilio. `TWILIO_FROM` is your Twilio number, e.g. `+15551234567`. `SMS_COUNTRY_CODE` defaults to `+91` |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | Twilio account used for SMS codes. `SMS_COUNTRY_CODE` defaults to `+91` |
+| `TWILIO_VERIFY_SERVICE_SID` | Twilio Verify service (`VA...`). Sends and checks the mobile codes; works on a Twilio trial account |
+| `TWILIO_FROM` | Optional, used only when no Verify service is set: your Twilio number for plain SMS (needs an upgraded account) |
 | `DEV_EXPOSE_OTP` | Off by default. `true` shows one-time codes on screen instead of sending them (testing only) |
 | `CORS_ORIGINS`, `PUBLIC_URL` | Allowed browser origins / site URL |
 | `SEED_DEMO` | `true` loads the demo data once |

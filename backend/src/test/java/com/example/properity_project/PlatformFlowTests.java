@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = {
+@SpringBootTest(properties = {"app.sms.twilio.account-sid=", "app.sms.twilio.verify-service-sid=", 
         "app.agent.email=agent@test.com", "app.agent.password=Agent@12345",
         "app.storage.dir=target/test-storage", "app.rate-limit.max-requests=1000", "app.dev-expose-otp=true"})
 @AutoConfigureMockMvc

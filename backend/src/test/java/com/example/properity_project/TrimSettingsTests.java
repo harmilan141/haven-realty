@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(properties = {"spring.datasource.username=\tsa  ", "app.agent.email=  boss@example.com\t",
+@SpringBootTest(properties = {"app.sms.twilio.account-sid=", "app.sms.twilio.verify-service-sid=", "spring.datasource.username=\tsa  ", "app.agent.email=  boss@example.com\t",
         "app.agent.password=Trim-Me-1 ", "app.storage.dir=target/test-storage-trim"})
 class TrimSettingsTests {
 

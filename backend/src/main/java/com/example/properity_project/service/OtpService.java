@@ -46,7 +46,8 @@ public class OtpService {
             mail.send(user.getEmail(), "Your Haven Realty code", text);
         }
         if ("PHONE".equals(channel) || "BOTH".equals(channel)) {
-            sms.send(user.getPhone(), text);
+            if (sms.usesVerify()) sms.startVerification(user.getPhone());
+            else sms.send(user.getPhone(), text);
         }
         return code;
     }
@@ -58,7 +59,11 @@ public class OtpService {
         if (t.getExpiresAt().isBefore(LocalDateTime.now()) || t.getAttempts() >= 5) {
             throw Errors.bad("Invalid or expired code");
         }
-        if (code == null || !encoder.matches(code.trim(), t.getCodeHash())) {
+        boolean ok = code != null && encoder.matches(code.trim(), t.getCodeHash());
+        if (!ok && !"EMAIL".equals(channel) && sms.usesVerify()) {
+            ok = sms.checkVerification(user.getPhone(), code);
+        }
+        if (!ok) {
             t.setAttempts(t.getAttempts() + 1);
             tokens.save(t);
             throw Errors.bad("Invalid or expired code");

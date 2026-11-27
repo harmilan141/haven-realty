@@ -32,7 +32,7 @@ function Detail({ id }) {
           <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-line pt-4 text-sm">
             <span className="text-muted">Account:</span><StatusBadge status={data.accountEnabled ? 'ACTIVE' : 'SUSPENDED'} />
             <span className="ml-3 text-muted">Seller:</span><StatusBadge status={data.sellerApplicationStatus} />
-            <span className="ml-3 text-muted">Email</span><StatusBadge status={u.emailVerified ? 'VERIFIED' : 'PENDING'} /><span className="text-muted">Mobile</span><StatusBadge status={u.phoneVerified ? 'VERIFIED' : 'PENDING'} />
+            
           </div>
           <p className="mt-4 text-sm text-muted">{data.enquiryCount} enquiries · {data.propertyCount} properties listed</p>
           {u.preferences && <p className="mt-3 rounded-lg bg-navy-50 p-3 text-sm"><b>Preferences:</b> {u.preferences}</p>}

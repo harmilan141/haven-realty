@@ -38,7 +38,6 @@ public class EnquiryService {
 
     @Transactional
     public CustomerEnquiry create(User customer, CreateEnquiry req) {
-        if (!customer.isEmailVerified()) throw Errors.forbidden("Please verify your email before sending enquiries");
         Property p = properties.findById(req.propertyId())
                 .filter(x -> PropertyService.PUBLISHED.equals(x.getStatus())).orElseThrow(() -> Errors.notFound("Property"));
         if (p.getSellerId().equals(customer.getId())) throw Errors.bad("You cannot enquire about your own property");

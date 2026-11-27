@@ -53,7 +53,6 @@ public class UserService implements UserDetailsService {
         if (!req.phone().equals(u.getPhone())) {
             if (users.existsByPhone(req.phone())) throw Errors.conflict("That mobile number is already registered");
             u.setPhone(req.phone());
-            u.setPhoneVerified(false);
         }
         u.setFullName(req.fullName());
         u.setDateOfBirth(req.dateOfBirth());

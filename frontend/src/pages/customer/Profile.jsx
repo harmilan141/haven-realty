@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, XCircle } from 'lucide-react';
 import api, { errorMessage, fieldErrors } from '../../api.js';
 import { useAuth } from '../../auth.jsx';
 import { Button, Card, Field, Input, PageHeader, StatusBadge, Textarea, useToast } from '../../components/ui.jsx';
@@ -26,7 +25,6 @@ export default function Profile() {
     try { await api.post('/account/change-password', pw); setPw({ currentPassword: '', newPassword: '' }); toast('Password changed'); }
     catch (err) { toast(errorMessage(err), 'error'); } finally { setBusy(''); }
   };
-  const tick = (ok, text) => <span className={`flex items-center gap-1.5 text-sm ${ok ? 'text-emerald-700' : 'text-amber-700'}`}>{ok ? <CheckCircle2 size={16} /> : <XCircle size={16} />}{text}</span>;
 
   return (
     <>
@@ -48,10 +46,8 @@ export default function Profile() {
         </Card>
         <div className="space-y-6">
           <Card>
-            <h2 className="mb-3 font-semibold text-navy-900">Verification</h2>
-            <div className="space-y-2">{tick(user.emailVerified, user.emailVerified ? 'Email verified' : 'Email not verified')}{tick(user.phoneVerified, user.phoneVerified ? 'Mobile verified' : 'Mobile not verified')}</div>
-            {(!user.emailVerified || !user.phoneVerified) && <Link to="/account/verify" className="mt-3 inline-block text-sm font-semibold text-gold-600">Verify now →</Link>}
-            <div className="mt-4 flex items-center justify-between border-t border-line pt-4"><span className="text-sm text-muted">Seller access</span><StatusBadge status={user.sellerStatus} /></div>
+            <h2 className="mb-3 font-semibold text-navy-900">Seller access</h2>
+            <div className="flex items-center justify-between"><span className="text-sm text-muted">Seller access</span><StatusBadge status={user.sellerStatus} /></div>
             <Link to={user.sellerStatus === 'VERIFIED' ? '/seller' : '/account/seller-application'} className="mt-2 inline-block text-sm font-semibold text-gold-600">{user.sellerStatus === 'VERIFIED' ? 'Open seller portal →' : 'Seller application →'}</Link>
           </Card>
           <Card>

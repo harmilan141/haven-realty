@@ -34,9 +34,6 @@ public class SellerVerificationService {
     public MyVerification submit(User current, boolean consent, MultipartFile identity,
                                  MultipartFile address, MultipartFile photo) {
         User user = users.findById(current.getId()).orElseThrow(() -> Errors.notFound("User"));
-        if (!user.isEmailVerified() || !user.isPhoneVerified()) {
-            throw Errors.bad("Please verify your email and mobile number before applying");
-        }
         if (!consent) throw Errors.bad("You must consent to the review of your documents");
 
         SellerVerification v = verifications.findFirstByUserIdOrderByIdDesc(user.getId()).orElse(null);

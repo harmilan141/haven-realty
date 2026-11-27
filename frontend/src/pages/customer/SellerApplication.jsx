@@ -25,7 +25,6 @@ export default function SellerApplication() {
 
   const status = data?.status;
   const canSubmit = !data || status === 'REJECTED' || status === 'RESUBMISSION_REQUIRED';
-  const needsVerification = !user.emailVerified || !user.phoneVerified;
 
   const submit = async (e) => {
     e.preventDefault(); setBusy(true);
@@ -66,9 +65,7 @@ export default function SellerApplication() {
         <Card>
           <h2 className="font-display mb-1 text-xl font-semibold text-navy-900">{data ? 'Resubmit your documents' : 'Upload your documents'}</h2>
           <p className="mb-5 text-sm text-muted">{data ? 'Replace only the documents that need fixing.' : 'All three are required. We never ask for bank or card details.'} Files are stored privately and only you and our agent can open them.</p>
-          {needsVerification ? (
-            <Alert tone="amber" title="Verify your contact details first">Confirm your email and mobile number before applying. <Link to="/account/verify" className="font-semibold underline">Verify now</Link></Alert>
-          ) : (
+          {(
             <form onSubmit={submit} className="space-y-4">
               {DOCS.map(([key, , title, hint, accept]) => (
                 <Field key={key} label={title} hint={hint}>

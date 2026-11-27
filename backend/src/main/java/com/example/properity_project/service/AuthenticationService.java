@@ -38,18 +38,16 @@ public class AuthenticationService {
         User user = users.save(User.builder().fullName(r.fullName().trim()).email(email)
                 .password(encoder.encode(r.password())).phone(r.phone()).dateOfBirth(r.dateOfBirth())
                 .address(r.address()).city(r.city()).state(r.state()).postalCode(r.postalCode())
-                .role("CUSTOMER").buyerEnabled(true).sellerEnabled(false).build());
+                .role("CUSTOMER").buyerEnabled(true).sellerEnabled(false)
+                .emailVerified(true).phoneVerified(true).build());
 
-        String emailCode = otp.issue(user, "EMAIL", "VERIFY");
-        String phoneCode = otp.issue(user, "PHONE", "VERIFY");
         audit.log(user.getId(), "CUSTOMER_REGISTERED", "User", user.getId(), "purpose=" + purpose);
         notifications.notifyAgent("New customer registered", user.getFullName() + " joined as " + purpose.toLowerCase(), "/agent/customers");
         notifications.notify(user.getId(), "Welcome to Haven Realty",
-                "Verify your email and mobile to start sending enquiries.", "/account/verify", false);
+                "Your account is ready. Start browsing properties.", "/properties", false);
 
-        String next = purpose.equals("BUY") ? "VERIFY" : "VERIFY_THEN_SELLER_APPLICATION";
-        return new AuthResponse(jwt.generateToken(user), userService.toView(user), next,
-                otp.isExposed() ? emailCode : null, otp.isExposed() ? phoneCode : null);
+        String next = purpose.equals("BUY") ? "DONE" : "SELLER_APPLICATION";
+        return new AuthResponse(jwt.generateToken(user), userService.toView(user), next, null, null);
     }
 
     public AuthResponse login(LoginRequest r) {

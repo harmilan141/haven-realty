@@ -15,7 +15,6 @@ const Wishlist = lazy(() => import('./pages/customer/Wishlist.jsx'));
 const Enquiries = lazy(() => import('./pages/customer/Enquiries.jsx'));
 const Profile = lazy(() => import('./pages/customer/Profile.jsx'));
 const SellerApplication = lazy(() => import('./pages/customer/SellerApplication.jsx'));
-const VerifyPage = lazy(() => import('./pages/customer/VerifyPage.jsx'));
 const SellerDashboard = lazy(() => import('./pages/seller/Dashboard.jsx'));
 const SellerProperties = lazy(() => import('./pages/seller/Properties.jsx'));
 const PropertyForm = lazy(() => import('./pages/seller/PropertyForm.jsx'));
@@ -59,7 +58,6 @@ export default function App() {
           <Route path="/account/enquiries" element={<Enquiries />} />
           <Route path="/account/enquiries/:id" element={<Enquiries />} />
           <Route path="/account/profile" element={<Profile />} />
-          <Route path="/account/verify" element={<VerifyPage />} />
           <Route path="/account/seller-application" element={<SellerApplication />} />
         </Route>
 

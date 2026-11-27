@@ -4,7 +4,6 @@ import { Eye, EyeOff, Home, Key, ShieldCheck, Store } from 'lucide-react';
 import api, { errorMessage, fieldErrors } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { Button, Field, Input, Select, useToast } from '../components/ui.jsx';
-import VerifyPanel from '../components/VerifyPanel.jsx';
 
 function Shell({ title, subtitle, children, wide }) {
   return (
@@ -76,7 +75,7 @@ export function Login() {
   );
 }
 
-const STEPS = ['Your details', 'Account', 'Purpose', 'Verify'];
+const STEPS = ['Your details', 'Account', 'Purpose'];
 const hasUpper = /[A-Za-z]/, hasNum = /\d/;
 
 export function Signup() {
@@ -87,8 +86,6 @@ export function Signup() {
   const [f, setF] = useState({ fullName: '', email: '', phone: '', dateOfBirth: '', address: '', city: '', state: 'Punjab', postalCode: '', password: '', confirm: '', purpose: 'BUY', consent: false });
   const [errs, setErrs] = useState({});
   const [busy, setBusy] = useState(false);
-  const [dev, setDev] = useState({});
-  const [created, setCreated] = useState(null);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
   const validate = (s) => {
@@ -113,15 +110,16 @@ export function Signup() {
 
   const next = () => validate(step) && setStep(step + 1);
 
+  const finish = () => nav(f.purpose === 'BUY' ? '/account' : '/account/seller-application', { replace: true });
+
   const create = async () => {
     if (!validate(2)) return;
     setBusy(true);
     try {
       const { confirm, consent, dateOfBirth, ...rest } = f;
-      const res = await register({ ...rest, dateOfBirth: dateOfBirth || null });
-      setDev({ email: res.devEmailCode, phone: res.devPhoneCode });
-      setCreated(res);
-      setStep(3);
+      await register({ ...rest, dateOfBirth: dateOfBirth || null });
+      toast('Welcome to Haven Realty! Your account is ready.');
+      finish();
     } catch (err) {
       const fe = fieldErrors(err);
       setErrs(fe);
@@ -130,8 +128,6 @@ export function Signup() {
       else if (fe.password) setStep(1);
     } finally { setBusy(false); }
   };
-
-  const finish = () => nav(f.purpose === 'BUY' ? '/account' : '/account/seller-application', { replace: true });
 
   return (
     <Shell title="Create your account" subtitle="One account for buying, renting and selling" wide>
@@ -162,7 +158,6 @@ export function Signup() {
         <div className="space-y-4">
           <Field label="Password" error={errs.password} hint="At least 8 characters, with a letter and a number"><PasswordInput value={f.password} onChange={set('password')} error={errs.password} autoComplete="new-password" /></Field>
           <Field label="Confirm password" error={errs.confirm}><PasswordInput value={f.confirm} onChange={set('confirm')} error={errs.confirm} autoComplete="new-password" /></Field>
-          <p className="text-sm text-muted">After creating your account we’ll ask you to confirm your email and mobile number with a one-time code.</p>
         </div>
       )}
 
@@ -184,20 +179,10 @@ export function Signup() {
         </div>
       )}
 
-      {step === 3 && (
-        <div>
-          <p className="mb-4 text-sm text-muted">Your account is ready. Confirm your contact details to start sending enquiries.</p>
-          <VerifyPanel devCodes={dev} onDone={finish} />
-          <div className="mt-6 text-center"><button className="text-sm font-semibold text-muted underline" onClick={finish}>Skip for now</button></div>
-        </div>
-      )}
-
-      {step < 3 && (
-        <div className="mt-8 flex items-center justify-between">
-          {step > 0 ? <Button variant="ghost" onClick={() => setStep(step - 1)}>Back</Button> : <Link to="/login" className="text-sm font-semibold text-muted">Already registered? Sign in</Link>}
-          {step < 2 ? <Button onClick={next}>Continue</Button> : <Button variant="gold" loading={busy} onClick={create}>Create account</Button>}
-        </div>
-      )}
+      <div className="mt-8 flex items-center justify-between">
+        {step > 0 ? <Button variant="ghost" onClick={() => setStep(step - 1)}>Back</Button> : <Link to="/login" className="text-sm font-semibold text-muted">Already registered? Sign in</Link>}
+        {step < 2 ? <Button onClick={next}>Continue</Button> : <Button variant="gold" loading={busy} onClick={create}>Create account</Button>}
+      </div>
     </Shell>
   );
 }

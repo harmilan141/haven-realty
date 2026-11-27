@@ -59,8 +59,8 @@ class PlatformFlowTests {
                 Map.entry("postalCode", "160017"), Map.entry("password", "Passw0rdOK"), Map.entry("purpose", purpose)))
                 .andExpect(status().isOk()));
         String token = res.get("token").asText();
-        postJ("/api/me/verify", token, Map.of("channel", "EMAIL", "code", res.get("devEmailCode").asText())).andExpect(status().isOk());
-        postJ("/api/me/verify", token, Map.of("channel", "PHONE", "code", res.get("devPhoneCode").asText())).andExpect(status().isOk());
+        org.junit.jupiter.api.Assertions.assertTrue(res.get("user").get("emailVerified").asBoolean());
+        org.junit.jupiter.api.Assertions.assertTrue(res.get("user").get("phoneVerified").asBoolean());
         return token;
     }
 
@@ -171,10 +171,10 @@ class PlatformFlowTests {
     @Test @Order(5)
     void enquiryFlowKeepsBuyerAndSellerApart() throws Exception {
         String raw = body(postJ("/api/auth/register", null, Map.ofEntries(
-                Map.entry("fullName", "Una Unverified"), Map.entry("email", "una@test.com"), Map.entry("phone", "9876500009"),
+                Map.entry("fullName", "Nina New"), Map.entry("email", "nina@test.com"), Map.entry("phone", "9876500009"),
                 Map.entry("address", "1 Rd"), Map.entry("city", "Mohali"), Map.entry("state", "Punjab"),
                 Map.entry("postalCode", "160055"), Map.entry("password", "Passw0rdOK"), Map.entry("purpose", "BUY")))).get("token").asText();
-        postJ("/api/me/enquiries", raw, Map.of("propertyId", propertyId, "enquiryType", "INFO", "message", "hi")).andExpect(status().isForbidden());
+        postJ("/api/me/enquiries", raw, Map.of("propertyId", propertyId, "enquiryType", "INFO", "message", "hi")).andExpect(status().isOk());
 
         postJ("/api/me/enquiries", seller, Map.of("propertyId", propertyId, "enquiryType", "INFO", "message", "hi")).andExpect(status().isBadRequest());
 
@@ -212,7 +212,7 @@ class PlatformFlowTests {
         String sellerNotes = getJ("/api/account/notifications", seller).andReturn().getResponse().getContentAsString();
         assertFalse(sellerNotes.contains("Bella"), "seller notification named the buyer");
         assertFalse(sellerNotes.contains("bella@test.com"));
-        assertEquals(1, body(getJ("/api/seller/dashboard", seller)).get("enquiryCount").asInt());
+        assertEquals(2, body(getJ("/api/seller/dashboard", seller)).get("enquiryCount").asInt());
     }
 
     @Test @Order(6)

@@ -30,7 +30,6 @@ export default function PropertyDetail() {
   const open = (kind) => {
     if (!user) return requireSignIn();
     if (!isBuyer) return toast('Only customer accounts can send enquiries', 'error');
-    if (!user.emailVerified) { toast('Please verify your email first', 'error'); return nav('/account/verify'); }
     setMessage(kind === 'visit' ? '' : `Hi, I'm interested in "${p.title}". Is it still available?`);
     setErrs({});
     setModal(kind);

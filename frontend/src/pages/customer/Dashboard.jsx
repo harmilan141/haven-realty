@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BadgeCheck, MailWarning, ShieldAlert, Store } from 'lucide-react';
+import { ArrowRight, BadgeCheck, ShieldAlert, Store } from 'lucide-react';
 import api from '../../api.js';
 import PropertyCard from '../../components/PropertyCard.jsx';
 import { Card, Empty, ErrorBox, PageHeader, Spinner, StatusBadge, fmtDateTime, useLoad } from '../../components/ui.jsx';
@@ -23,11 +23,6 @@ export default function Dashboard() {
     <>
       <PageHeader title={`Hello, ${u.fullName.split(' ')[0]}`} subtitle="Here’s what’s happening with your search." />
 
-      {(!u.emailVerified || !u.phoneVerified) && (
-        <Link to="/account/verify" className="mb-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <MailWarning size={20} /><span><b>Verify your {!u.emailVerified ? 'email' : 'mobile number'}</b> to send enquiries{!u.phoneVerified && u.emailVerified ? ' and apply as a seller' : ''}.</span><ArrowRight size={16} className="ml-auto" />
-        </Link>
-      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card><p className="text-xs font-semibold uppercase tracking-wide text-muted">Seller status</p>

@@ -246,11 +246,10 @@ route('POST', '/auth/register', 'public', async ({ db, body: r }) => {
   const purpose = (r.purpose || 'BUY').toUpperCase();
   if (!/^(BUY|SELL|BOTH)$/.test(purpose)) bad('Choose Buy, Sell or Both');
   const u = insert(db, 'users', { fullName: r.fullName.trim(), email, password: await hash(r.password), phone: r.phone, dateOfBirth: r.dateOfBirth || null, address: r.address, city: r.city, state: r.state, postalCode: r.postalCode ?? null, role: 'CUSTOMER' });
-  const devEmailCode = issueCode(db, u, 'EMAIL', 'VERIFY'), devPhoneCode = issueCode(db, u, 'PHONE', 'VERIFY');
   audit(db, u.id, 'CUSTOMER_REGISTERED', 'User', u.id, `purpose=${purpose}`);
   notifyAgent(db, 'New customer registered', `${u.fullName} joined as ${purpose.toLowerCase()}`, '/agent/customers');
-  notify(db, u.id, 'Welcome to Haven Realty', 'Verify your email and mobile to start sending enquiries.', '/account/verify');
-  return { token: token(u), user: userView(db, u), nextStep: purpose === 'BUY' ? 'VERIFY' : 'VERIFY_THEN_SELLER_APPLICATION', devEmailCode, devPhoneCode };
+  notify(db, u.id, 'Welcome to Haven Realty', 'Your account is ready. Start browsing properties.', '/properties');
+  return { token: token(u), user: userView(db, u), nextStep: purpose === 'BUY' ? 'DONE' : 'SELLER_APPLICATION' };
 });
 
 route('POST', '/auth/login', 'public', async ({ db, body: r }) => {
@@ -400,7 +399,6 @@ route('PUT', '/me', 'CUSTOMER', ({ db, user: u, body: r }) => {
   if (r.phone !== u.phone) {
     if (db.users.some((x) => x.phone === r.phone)) conflict('That mobile number is already registered');
     u.phone = r.phone;
-    u.phoneVerified = false;
   }
   for (const k of ['fullName', 'dateOfBirth', 'address', 'city', 'state', 'postalCode', 'preferences']) u[k] = r[k] ?? null;
   return userView(db, u);
@@ -423,7 +421,6 @@ route('GET', '/me/seller-application', 'CUSTOMER', ({ db, user }) => myVerificat
 route('POST', '/me/seller-application', 'CUSTOMER', async ({ db, user, form }) => {
   const file = (k) => { const f = form.get(k); return f && f.size ? f : null; };
   const identity = file('identity'), address = file('address'), photo = file('photo');
-  if (!user.emailVerified || !user.phoneVerified) bad('Please verify your email and mobile number before applying');
   if (String(form.get('consent')) !== 'true') bad('You must consent to the review of your documents');
   let v = latestVerification(db, user.id);
   const resubmission = v?.status === 'RESUBMISSION_REQUIRED';
@@ -465,7 +462,6 @@ route('GET', '/me/dashboard', 'CUSTOMER', ({ db, user }) => ({
 
 route('POST', '/me/enquiries', 'CUSTOMER', ({ db, user, body: r }) => {
   validate(r, { propertyId: [required('Property is required')], enquiryType: [matches(/^(BUY|RENT|INFO|SITE_VISIT)$/, 'Choose a valid enquiry type')], message: [required('Please write a message'), maxLen(2000)] });
-  if (!user.emailVerified) forbidden('Please verify your email before sending enquiries');
   const p = byId(db, 'properties', r.propertyId);
   if (p?.status !== PUBLISHED) notFound('Property');
   if (p.sellerId === user.id) bad('You cannot enquire about your own property');

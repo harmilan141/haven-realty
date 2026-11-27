@@ -2,6 +2,7 @@ package com.example.properity_project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
+@DynamicUpdate
 @Getter
 @Setter
 @Builder

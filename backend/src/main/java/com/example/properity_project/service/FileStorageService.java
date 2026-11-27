@@ -2,15 +2,17 @@ package com.example.properity_project.service;
 
 import com.example.properity_project.util.Errors;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -26,10 +28,16 @@ public class FileStorageService {
     private static final long MAX_PDF = 10L * 1024 * 1024;
 
     private final Path root;
+    private final boolean inDatabase;
+    private final JdbcTemplate jdbc;
 
-    public FileStorageService(@Value("${app.storage.dir}") String dir) throws IOException {
+    public FileStorageService(@Value("${app.storage.dir}") String dir,
+                              @Value("${app.storage.mode:disk}") String mode,
+                              JdbcTemplate jdbc) throws IOException {
         this.root = Path.of(dir).toAbsolutePath().normalize();
-        Files.createDirectories(root);
+        this.inDatabase = "db".equalsIgnoreCase(mode.trim());
+        this.jdbc = jdbc;
+        if (!inDatabase) Files.createDirectories(root);
     }
 
     public Stored store(MultipartFile file, boolean imageOnly) {
@@ -42,49 +50,59 @@ public class FileStorageService {
         }
         long limit = type.equals("application/pdf") ? MAX_PDF : MAX_IMAGE;
         if (file.getSize() > limit) throw Errors.bad("File is too large (limit " + (limit / 1024 / 1024) + " MB)");
-        try (InputStream in = file.getInputStream()) {
-            byte[] head = in.readNBytes(8);
-            if (!matchesMagic(type, head)) throw Errors.bad("File content does not match its type");
+        byte[] data;
+        try {
+            data = file.getBytes();
         } catch (IOException e) {
             throw Errors.bad("Could not read the uploaded file");
         }
+        if (!matchesMagic(type, data)) throw Errors.bad("File content does not match its type");
         String stored = UUID.randomUUID() + "." + ext;
-        try (InputStream in = file.getInputStream()) {
-            Files.copy(in, root.resolve(stored));
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not save file", e);
-        }
-        return new Stored(stored, original, type, file.getSize());
+        write(stored, data);
+        return new Stored(stored, original, type, data.length);
     }
 
     public Resource load(String storedName) {
+        if (inDatabase) {
+            List<byte[]> rows = jdbc.query("SELECT content FROM stored_files WHERE name = ?", (rs, i) -> rs.getBytes(1), storedName);
+            if (rows.isEmpty()) throw Errors.notFound("File");
+            return new ByteArrayResource(rows.get(0));
+        }
         Path p = root.resolve(storedName).normalize();
         if (!p.startsWith(root) || !Files.exists(p)) throw Errors.notFound("File");
         return new FileSystemResource(p);
     }
 
     public boolean exists(String storedName) {
+        if (inDatabase) {
+            Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM stored_files WHERE name = ?", Integer.class, storedName);
+            return n != null && n > 0;
+        }
         return Files.exists(root.resolve(storedName).normalize());
     }
 
     public void writeNamed(String storedName, byte[] data) {
-        Path p = root.resolve(storedName).normalize();
-        if (!p.startsWith(root)) throw new IllegalArgumentException("bad name");
-        try {
-            Files.write(p, data);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        if (!inDatabase && !root.resolve(storedName).normalize().startsWith(root)) throw new IllegalArgumentException("bad name");
+        write(storedName, data);
     }
 
     public Stored storeBytes(byte[] data, String ext, String type, String originalName) {
         String stored = UUID.randomUUID() + "." + ext;
-        try {
-            Files.write(root.resolve(stored), data);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        write(stored, data);
         return new Stored(stored, originalName, type, data.length);
+    }
+
+    private void write(String name, byte[] data) {
+        if (inDatabase) {
+            jdbc.update("DELETE FROM stored_files WHERE name = ?", name);
+            jdbc.update("INSERT INTO stored_files (name, content) VALUES (?, ?)", name, data);
+            return;
+        }
+        try {
+            Files.write(root.resolve(name), data);
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not save file", e);
+        }
     }
 
     private static boolean matchesMagic(String type, byte[] h) {

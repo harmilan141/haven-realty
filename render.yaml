@@ -14,7 +14,7 @@ services:
       - key: DB_PASSWORD
         sync: false
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: AGENT_EMAIL
         sync: false
       - key: AGENT_PASSWORD
@@ -23,13 +23,21 @@ services:
         value: "true"
       - key: DEV_EXPOSE_OTP
         value: "false"
+      - key: STORAGE_MODE
+        value: db
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
         sync: false
-      - key: TWILIO_FROM
-        sync: false
       - key: TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
         sync: false
       - key: PUBLIC_URL
         sync: false

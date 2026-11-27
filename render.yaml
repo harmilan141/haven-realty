@@ -22,7 +22,7 @@ services:
       - key: SEED_DEMO
         value: "true"
       - key: DEV_EXPOSE_OTP
-        value: "false"
+        value: "true"
       - key: STORAGE_MODE
         value: db
       - key: TWILIO_ACCOUNT_SID
